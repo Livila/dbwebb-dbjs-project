@@ -7,10 +7,10 @@ SET NAMES 'utf8';
 CREATE TABLE User (
     userId INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
     pinCode INT(4) NOT NULL,
+-- YYYYMMDDXXXX
+    civicNumber CHAR(12) UNIQUE NOT NULL,
     firstName CHAR(20) NOT NULL,
     lastName CHAR(20) NOT NULL,
--- YYYYMMDDXXXX
-    civicNumber CHAR(12) NOT NULL,
     street CHAR(20) NOT NULL,
     city CHAR (20) NOT NULL
 );
@@ -29,7 +29,7 @@ CREATE TABLE UserAccount (
 );
 
 INSERT INTO User
-(pinCode, firstName, lastName, civicNumber, street, city)
+(pinCode, civicNumber, firstName, lastName, street, city)
 VALUES
 (1234, 'Oskar', 'Art', '198804131234', 'Oskargatan', 'Oskarstaden'),
 (1234, 'Olle', 'Art', '198906131111', 'Oskargatan', 'Oskarstaden');
