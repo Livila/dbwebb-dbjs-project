@@ -1,6 +1,8 @@
 DROP DATABASE IF EXISTS Internetbanken;
 CREATE DATABASE Internetbanken;
 
+-- Myisam eller InnoDB eller ingen skillnad
+
 USE Internetbanken;
 SET NAMES 'utf8';
 
@@ -27,7 +29,7 @@ CREATE TABLE UserAccount (
     FOREIGN KEY (userId) REFERENCES User(userId),
     FOREIGN KEY (accountId) REFERENCES Account(accountId)
 );
-
+/*
 INSERT INTO User
 (pinCode, civicNumber, firstName, lastName, street, city)
 VALUES
@@ -46,3 +48,20 @@ VALUES
 (1, 1),
 (2, 2),
 (1, 2);
+*/
+
+INSERT INTO User VALUES (1, 1234, 'Oskar', 'Art', '198804131234', 'Oskargatan', 'Oskarstaden');
+INSERT INTO User VALUES (2, 1234, 'Olle', 'Art', '198906131111', 'Oskargatan', 'Oskarstaden');
+
+INSERT INTO Account VALUES (1, '1234567812345678', 100);
+INSERT INTO Account VALUES (2, '1130491238512304', 20000);
+
+INSERT INTO UserAccount VALUES (1, 1);
+INSERT INTO UserAccount VALUES (2, 2);
+INSERT INTO UserAccount VALUES (1, 2);
+
+DROP VIEW IF EXISTS VUserAndAccount;
+CREATE VIEW VUserAndAccount AS
+SELECT User.firstName AS 'first name', User.lastName AS 'last name', Account.balance AS 'balance', Account.accountId AS 'account id' FROM User, Account
+INNER JOIN UserAccount ON User.userId = UserAccount.userId
+INNER JOIN UserAccount ON UserAccount.accountId = Account.accountId;
