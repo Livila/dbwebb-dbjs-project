@@ -20,6 +20,7 @@ sql.init = (databaseConnOpt) => {
 
     console.log();
     console.log('Connecting to the database...');
+
     connection = mysql.createConnection({
         host: databaseConnOpt.host,
         port: databaseConnOpt.port,
@@ -27,8 +28,15 @@ sql.init = (databaseConnOpt) => {
         password: databaseConnOpt.password,
         database: databaseConnOpt.database });
 
-    connection.connect();
-    console.log('Connected!');
+    return new Promise((resolve, reject) => {
+            connection.connect(function(err) {
+            if (err) {
+                reject(err)
+            }
+
+            resolve();
+        })
+    });
 };
 
 /**

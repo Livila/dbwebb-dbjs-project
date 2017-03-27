@@ -11,17 +11,40 @@ const readlineInterface = readline.createInterface({
 const sql = require('./sql');
 
 const helpText = `Available commands:
-  exit, help, version, users`;
+  exit, help, version, resetdatabase, filldatabase, users`;
 
 var mainLoop = (databaseConnOpt, version) => {
-    sql.init(databaseConnOpt);
+    readlineInterface.setPrompt('Internetbanken$ ');
+
+    connectToDatabase(databaseConnOpt);
+
     VERSION = version;
 
     console.log(helpText);
-
-    readlineInterface.setPrompt('Internetbanken$ ');
-    readlineInterface.prompt();
 };
+
+
+var connectToDatabase = (databaseConnOpt) => {
+    sql.init(databaseConnOpt)
+    .then(() => {
+        console.log('Connected!');
+        readlineInterface.prompt();
+    })
+    .catch((err) => {
+        console.log('Something went wrong...');
+
+        readlineInterface.question('Do you want to try again? (yes/no/log)', function(answer) {
+            if (answer == 'yes' || answer == 'y') {
+                connectToDatabase(databaseConnOpt);
+            } else if (answer == 'log' || answer == 'l') {
+                console.log(err);
+                connectToDatabase(databaseConnOpt);
+            } else {
+                process.exit(1);
+            }
+        });
+    });
+}
 
 
 var exitMainLoop = () => {
