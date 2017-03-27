@@ -29,18 +29,18 @@ CREATE TABLE UserAccount (
     FOREIGN KEY (userId) REFERENCES User(userId),
     FOREIGN KEY (accountId) REFERENCES Account(accountId)
 );
-/*
+
 INSERT INTO User
 (pinCode, civicNumber, firstName, lastName, street, city)
 VALUES
-(1234, 'Oskar', 'Art', '198804131234', 'Oskargatan', 'Oskarstaden'),
-(1234, 'Olle', 'Art', '198906131111', 'Oskargatan', 'Oskarstaden');
+(1234, '198804131234', 'Oskar', 'Art', 'Oskargatan', 'Oskarstaden'),
+(1234, '198906131111', 'Olle', 'Art', 'Oskargatan', 'Oskarstaden');
 
 INSERT INTO Account
-(accountNr)
+(accountNr, balance)
 VALUES
-('1234567812345678'),
-('1130491238512304');
+('1234567812345678', 0),
+('1130491238512304', 0);
 
 INSERT INTO UserAccount
 (userId, accountId)
@@ -48,21 +48,9 @@ VALUES
 (1, 1),
 (2, 2),
 (1, 2);
-*/
 
-INSERT INTO User VALUES (1, 1234, 'Oskar', 'Art', '198804131234', 'Oskargatan', 'Oskarstaden');
-INSERT INTO User VALUES (2, 1234, 'Olle', 'Art', '198906131111', 'Oskargatan', 'Oskarstaden');
-
-INSERT INTO Account VALUES (1, '1234567812345678', 100);
-INSERT INTO Account VALUES (2, '1130491238512304', 20000);
-
-INSERT INTO UserAccount VALUES (1, 1);
-INSERT INTO UserAccount VALUES (2, 2);
-INSERT INTO UserAccount VALUES (1, 2);
-
--- Not needed because the database is dropped and re-created.
---DROP VIEW IF EXISTS VUserAndAccount;
 CREATE VIEW VUserAndAccount AS
-SELECT User.firstName AS 'first name', User.lastName AS 'last name', Account.balance AS 'balance', Account.accountId AS 'account id' FROM UserAccount
+SELECT User.firstName as firstName, User.lastName AS lastName, Account.balance AS balance, Account.accountId AS accountId FROM UserAccount
 INNER JOIN User ON User.userId = UserAccount.userId
 INNER JOIN Account ON UserAccount.accountId = Account.accountId;
+
