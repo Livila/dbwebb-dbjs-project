@@ -133,7 +133,7 @@ SELECT * FROM VUserAndAccount
 
     var prettyPrint = (res) => {
         res.forEach((row, count) => {
-            console.log(`${count}: ${row.firstName} - ${row.balance}`);
+            console.log(`${count} [account ${row.accountId}]: ${row.firstName} ${row.lastName} - ${row.balance}kr`);
         });
     };
 
