@@ -17,11 +17,19 @@ var mainLoop = (databaseConnOpt, version) => {
     readlineInterface.setPrompt('Internetbanken$ ');
     VERSION = version;
 
+    checkOptionsRequired(databaseConnOpt);
     connectToDatabase(databaseConnOpt);
 };
 
+var checkOptionsRequired = (databaseConnOpt) => {
+    if (databaseConnOpt.password == '?') {
+        var value = ask('Enter password: ');
+        databaseConnOpt.password = value;
+    }
+};
+
 var connectToDatabase = (databaseConnOpt) => {
-    sql.init(databaseConnOpt)
+    return sql.init(databaseConnOpt)
     .then(() => {
         console.log('Connected!');
         console.log(helpText);
@@ -36,7 +44,7 @@ var connectToDatabase = (databaseConnOpt) => {
 
         connectToDatabaseQuestion(databaseConnOpt, err);
     });
-}
+};
 
 var connectToDatabaseQuestion = (databaseConnOpt, err) => {
     readlineInterface.question('Do you want to try again? (log/yes/no)', function(answer) {
@@ -50,7 +58,7 @@ var connectToDatabaseQuestion = (databaseConnOpt, err) => {
             process.exit(1);
         }
     });
-}
+};
 
 
 var exitMainLoop = () => {
@@ -108,6 +116,12 @@ readlineInterface.on('line', (line) => {
 });
 
 readlineInterface.on('close', exitMainLoop);
+
+function ask(question, reply) {
+    readlineInterface.question(question, function(answer) {
+        return answer;
+    });
+};
 
 module.exports = {
     mainLoop: mainLoop

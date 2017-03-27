@@ -19,6 +19,7 @@ var usage = () => {
 Options:
    -h, --help                       Display help text.
    -v, --version                    Display the version.
+   -p                               Enter the password when the program starts.
    --host [string]                  Set the host. Default is '${databaseConnOpt.host}'.
    --port [number]                  Set the port. Default is '${databaseConnOpt.port}'.
    --user [string]                  Set the user. Default is '${databaseConnOpt.user}'.
@@ -51,6 +52,10 @@ cli.checkOptionsArguments = () => {
             case "--version":
                 version();
                 process.exit(0);
+            break;
+
+            case "-p":
+                databaseConnOpt.password = '?';
             break;
 
             case "--host":
