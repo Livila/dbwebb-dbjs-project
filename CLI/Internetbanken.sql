@@ -31,26 +31,27 @@ CREATE TABLE UserAccount (
 );
 
 INSERT INTO User
-(pinCode, civicNumber, firstName, lastName, street, city)
+	(pinCode, civicNumber, firstName, lastName, street, city)
 VALUES
-(1234, '198804131234', 'Oskar', 'Art', 'Oskargatan', 'Oskarstaden'),
-(1234, '198906131111', 'Olle', 'Art', 'Oskargatan', 'Oskarstaden');
+	(1234, '198804131234', 'Oskar', 'Art', 'Oskargatan', 'Oskarstaden'),
+	(1234, '198906131111', 'Olle', 'Art', 'Oskargatan', 'Oskarstaden');
 
 INSERT INTO Account
-(accountNr, balance)
+	(accountNr, balance)
 VALUES
-('1234567812345678', 0),
-('1130491238512304', 0);
+	('1234567812345678', 0),
+	('1130491238512304', 0);
 
 INSERT INTO UserAccount
-(userId, accountId)
+	(userId, accountId)
 VALUES
-(1, 1),
-(2, 2),
-(1, 2);
+	(1, 1),
+	(2, 2),
+	(1, 2);
 
 CREATE VIEW VUserAndAccount AS
-SELECT User.firstName as firstName, User.lastName AS lastName, Account.balance AS balance, Account.accountId AS accountId FROM UserAccount
+SELECT User.firstName, User.lastName, Account.balance, Account.accountId
+FROM UserAccount
 INNER JOIN User ON User.userId = UserAccount.userId
 INNER JOIN Account ON UserAccount.accountId = Account.accountId;
 
