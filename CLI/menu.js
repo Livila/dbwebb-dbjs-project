@@ -47,6 +47,16 @@ readlineInterface.on('line', (line) => {
             readlineInterface.prompt();
         break;
 
+        case "resetdatabase":
+            sql.resetDatabase();
+            readlineInterface.prompt();
+        break;
+
+        case "filldatabase":
+            sql.fillDatabase();
+            readlineInterface.prompt();
+        break;
+
         case "users":
             sql.showUsers()
             .then((/*value*/) => {
