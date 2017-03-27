@@ -31,7 +31,7 @@ sql.init = (databaseConnOpt) => {
     return new Promise((resolve, reject) => {
             connection.connect(function(err) {
             if (err) {
-                reject(err)
+                reject(err);
             }
 
             resolve();

@@ -29,7 +29,7 @@ var connectToDatabase = (databaseConnOpt) => {
     })
     .catch((err) => {
         console.log('Something went wrong... please make sure that:');
-        console.log(' - the database exists.');
+        console.log(' - that the database exists.');
         console.log(' - that you are using the correct username and password.');
         console.log(' - that the user you are using has enough permission.');
         console.log();
@@ -94,6 +94,10 @@ readlineInterface.on('line', (line) => {
             .catch((err) => {
                 throw err;
             });
+        break;
+
+        case "":
+            readlineInterface.prompt();
         break;
 
         default:
