@@ -13,9 +13,9 @@ const sql = require('./sql');
 const helpText = `Available commands:
   exit, help, version, users`;
 
-var mainLoop = (databaseConnOpt, VERSION) => {
+var mainLoop = (databaseConnOpt, version) => {
     sql.init(databaseConnOpt);
-    this.VERSION = VERSION;
+    VERSION = version;
 
     console.log(helpText);
 

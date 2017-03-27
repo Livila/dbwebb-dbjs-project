@@ -8,4 +8,4 @@ var cliOptions = cli.checkOptionsArguments();
 
 // Initialize the menu.
 const menu = require('./menu');
-menu.mainLoop(cliOptions.databaseConnOpt, cliOptions.version);
+menu.mainLoop(cliOptions.databaseConnOpt, cliOptions.VERSION);
