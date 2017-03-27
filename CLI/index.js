@@ -1,22 +1,16 @@
-//byt gärna namn på fil
-// allan med HTTP requests
+#!/usr/bin/env node
 
 'use strict';
 
-
-#!/usr/bin/env node
-
-"use strict";
+const VERSION = "1.0.0";
 
 var mysql      = require("mysql");
 var connection = mysql.createConnection({
     host     : "localhost",
-    user     : "user",
-    password : "pass",
-    database : "nodedb"
+    user     : "internetbanken",
+    password : "Admin!",
+    database : "Internetbanken"
 });
-
-const VERSION = "1.0.0";
 
 var path = require('path');
 var scriptName = path.basename(process.argv[1]);
@@ -147,7 +141,7 @@ args.forEach((arg) => {
     }
 });
 
-
+var min, max, number;
 
 // Check if there is remaining arguments that should be used for min and max
 if (remaining.length >= 2) {
