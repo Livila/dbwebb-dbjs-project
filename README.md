@@ -35,3 +35,9 @@ Run "git help", "man git" or "git help everyday" for help and descriptions.
 - git pull
 
 - git stash pop
+
+#### WARNING: Be careful. Will remove items that are not pushed.
+
+- git reset HEAD
+
+- git checkout --
