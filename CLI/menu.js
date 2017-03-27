@@ -1,7 +1,7 @@
 'use strict';
 
 const readline = require('readline');
-var VERSION = "none";
+var VERSION = "none"; // Will be updated from cli.js once it's loaded.
 
 const readlineInterface = readline.createInterface({
     input: process.stdin,
@@ -15,34 +15,40 @@ const helpText = `Available commands:
 
 var mainLoop = (databaseConnOpt, version) => {
     readlineInterface.setPrompt('Internetbanken$ ');
-
-    connectToDatabase(databaseConnOpt);
-
     VERSION = version;
 
-    console.log(helpText);
+    connectToDatabase(databaseConnOpt);
 };
-
 
 var connectToDatabase = (databaseConnOpt) => {
     sql.init(databaseConnOpt)
     .then(() => {
         console.log('Connected!');
+        console.log(helpText);
         readlineInterface.prompt();
     })
     .catch((err) => {
-        console.log('Something went wrong...');
+        console.log('Something went wrong... please make sure that:');
+        console.log(' - the database exists.');
+        console.log(' - that you are using the correct username and password.');
+        console.log(' - that the user you are using has enough permission.');
+        console.log();
 
-        readlineInterface.question('Do you want to try again? (yes/no/log)', function(answer) {
-            if (answer == 'yes' || answer == 'y') {
-                connectToDatabase(databaseConnOpt);
-            } else if (answer == 'log' || answer == 'l') {
-                console.log(err);
-                connectToDatabase(databaseConnOpt);
-            } else {
-                process.exit(1);
-            }
-        });
+        connectToDatabaseQuestion(databaseConnOpt, err);
+    });
+}
+
+var connectToDatabaseQuestion = (databaseConnOpt, err) => {
+    readlineInterface.question('Do you want to try again? (log/yes/no)', function(answer) {
+        if (answer == 'yes' || answer == 'y') {
+            connectToDatabase(databaseConnOpt);
+        } else if (answer == 'log' || answer == 'l') {
+            console.log(err);
+            connectToDatabaseQuestion(databaseConnOpt, err);
+        } else {
+            console.log('See you!');
+            process.exit(1);
+        }
     });
 }
 
