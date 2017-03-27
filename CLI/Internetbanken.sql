@@ -60,7 +60,8 @@ INSERT INTO UserAccount VALUES (1, 1);
 INSERT INTO UserAccount VALUES (2, 2);
 INSERT INTO UserAccount VALUES (1, 2);
 
-DROP VIEW IF EXISTS VUserAndAccount;
+-- Not needed because the database is dropped and re-created.
+--DROP VIEW IF EXISTS VUserAndAccount;
 CREATE VIEW VUserAndAccount AS
 SELECT User.firstName AS 'first name', User.lastName AS 'last name', Account.balance AS 'balance', Account.accountId AS 'account id' FROM User, Account
 INNER JOIN UserAccount ON User.userId = UserAccount.userId

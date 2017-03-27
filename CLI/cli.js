@@ -22,7 +22,7 @@ Options:
    --host [string]                  Set the host. Default is '${databaseConnOpt.host}'.
    --port [number]                  Set the port. Default is '${databaseConnOpt.port}'.
    --user [string]                  Set the user. Default is '${databaseConnOpt.user}'.
-   --password [string]              Set the password. Default is ${databaseConnOpt.password == '' ? 'NO password' : "'" + databaseConnOpt.host + "'"}.
+   --password [string]              Set the password. Default is ${databaseConnOpt.password == '' ? 'NO password' : "'" + databaseConnOpt.password + "'"}.
    --database [string]              Set the database. Default is '${databaseConnOpt.database}'.
 `);
 };

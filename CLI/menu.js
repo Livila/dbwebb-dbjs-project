@@ -36,13 +36,17 @@ readlineInterface.on('line', (line) => {
         case "exit":
             exitMainLoop();
         break;
+
         case "help":
             console.log(helpText);
             readlineInterface.prompt();
         break;
+
         case "version":
             console.log("Version " + VERSION);
             readlineInterface.prompt();
+        break;
+
         case "users":
             sql.showUsers()
             .then((/*value*/) => {

@@ -10,21 +10,22 @@ var connection;
  *
  * @param options Array of database information for connecting.
  */
-sql.init = (options) => {
-    console.log('Using current settings:');
-    console.log('  Host              ' + options.host);
-    console.log('  Port              ' + options.port);
-    console.log('  User              ' + options.user);
-    console.log('  Database          ' + options.database);
+sql.init = (databaseConnOpt) => {
+    console.log(`Using current database settings:
+  Host              ${databaseConnOpt.host}
+  Port              ${databaseConnOpt.port}
+  User              ${databaseConnOpt.user}
+  Password          ${databaseConnOpt.password == '' ? 'NO password' : '********'}
+  Database          ${databaseConnOpt.database}`);
 
     console.log();
     console.log('Connecting to the database...');
     connection = mysql.createConnection({
-        host: options.host,
-        port: options.port,
-        user: options.user,
-        password: options.password,
-        database: options.database });
+        host: databaseConnOpt.host,
+        port: databaseConnOpt.port,
+        user: databaseConnOpt.user,
+        password: databaseConnOpt.password,
+        database: databaseConnOpt.database });
 
     connection.connect();
     console.log('Connected!');
@@ -34,9 +35,9 @@ sql.init = (options) => {
  * End the SQL connection.
  */
 sql.end = () => {
-    console.log("Closing the connection...");
+    console.log('Closing the connection...');
     connection.end();
-    console.log("Connection closed.");
+    console.log('Connection closed.');
 };
 
 /**
