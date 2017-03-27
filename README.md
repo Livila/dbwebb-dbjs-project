@@ -38,7 +38,13 @@ Run "git help", "man git" or "git help everyday" for help and descriptions.
 
 - git stash pop
 
-#### WARNING: Be careful. Will remove items that are not pushed.
+#### Check out 'man git checkout' or 'git help checkout' first.
+
+- git checkout [branchname]
+
+- git checkout -b [newbranchname]
+
+#### WARNING: Be careful. Might do something unintended.
 
 - git reset HEAD
 
