@@ -2,19 +2,10 @@
 
 'use strict';
 
-const VERSION = "1.0.0";
+// Get command line arguments.
+const cli = require('./cli');
+var databaseConnOpt = cli.checkOptionsArguments();
 
-var mysql      = require("mysql");
-var connection = mysql.createConnection({
-    host     : "localhost",
-    user     : "internetbanken",
-    password : "Admin!",
-    database : "Internetbanken"
-});
-
-var path = require('path');
-var scriptName = path.basename(process.argv[1]);
-var args = process.argv.slice(2);
 
 var readline = require("readline");
 
@@ -52,7 +43,11 @@ function version() {
  * Display a menu.
  */
 function menu() {
-    console.log(`Use any of the commands: `);
+    console.log(`Use any of the commands:
+   exit
+   menu
+   version
+   users`);
 }
 
 /**
@@ -109,7 +104,7 @@ rl.on("line", function(line) {
             break;
 
         default:
-            console.log("I don´t understand");
+            console.log("I don´t understand the command...");
     }
     rl.prompt();
 });
@@ -119,47 +114,11 @@ rl.on("close", function() {
     process.exit(0);
 });
 
-
-
-// Walkthrough all arguments checking for options.
-var remaining = [];
-args.forEach((arg) => {
-    switch (arg) {
-        case '-h':
-            usage();
-            process.exit(0);
-            break;
-
-        case '-v':
-            version();
-            process.exit(0);
-            break;
-
-        default:
-            remaining.push(arg);
-            break;
-    }
-});
-
-var min, max, number;
-
-// Check if there is remaining arguments that should be used for min and max
-if (remaining.length >= 2) {
-    min = parseInt(remaining[0], 10);
-    max = parseInt(remaining[1], 10);
-} else if (remaining.length === 1) {
-    min = parseInt(remaining[0], 10);
-}
-
-number = Math.floor((Math.random() * max) + min);
-
-
-
 /**
  * Here comes the actual main-program.
  */
-console.log("I am thinking of a number between " + min + " and " + max);
-rl.setPrompt("Guess my number$ ");
+menu();
+rl.setPrompt("Internetbanken$ ");
 rl.prompt();
 
 /*
