@@ -6,8 +6,8 @@ const path = require('path');
 var databaseConnOpt = {
     "host":"localhost",
     "port":"3306",
-    "user":"internetbanken",
-    "password":"Admin!",
+    "user":"root",
+    "password":"",
     "database":"Internetbanken"
 };
 
@@ -19,11 +19,11 @@ var usage = () => {
 Options:
    -h, --help                       Display help text.
    -v, --version                    Display the version.
-   --host [string]                  Set the host. Default is 'localhost'.
-   --port [number]                  Set the port. Default is '3306'.
-   --user [string]                  Set the user. Default is 'internetbanken'.
-   --password [string]              Set the password. Default is Admin!.
-   --database [string]              Set the database. Default is 'Internetbanken'.
+   --host [string]                  Set the host. Default is '${databaseConnOpt.host}'.
+   --port [number]                  Set the port. Default is '${databaseConnOpt.port}'.
+   --user [string]                  Set the user. Default is '${databaseConnOpt.user}'.
+   --password [string]              Set the password. Default is ${databaseConnOpt.password == '' ? 'NO password' : "'" + databaseConnOpt.host + "'"}.
+   --database [string]              Set the database. Default is '${databaseConnOpt.database}'.
 `);
 };
 
@@ -31,8 +31,8 @@ var version = () => {
     console.log(VERSION);
 };
 
-var unknownOption = (option) => {
-    console.log(`Unknown option: ${option}
+var unknownOption = (arg) => {
+    console.log(`Unknown option: ${arg}
 Use --help to get an overview of all commands.`);
 };
 
@@ -82,7 +82,8 @@ cli.checkOptionsArguments = () => {
         }
     });
 
-    return databaseConnOpt;
+    // What's returned to index.js.
+    return { databaseConnOpt, VERSION };
 };
 
 module.exports = cli;
