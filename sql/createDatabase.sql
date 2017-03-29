@@ -12,8 +12,6 @@ CREATE PROCEDURE `createdatabase` ()
 BEGIN
 
 
-SET NAMES 'utf8';
-
 -- Drop tables in reverse order.
 DROP TABLE IF EXISTS `UserAccount`;
 DROP TABLE IF EXISTS `Account`;
@@ -51,18 +49,17 @@ CREATE TABLE UserAccount (
 -- Create view
 DROP VIEW IF EXISTS `VUserAndAccount`;
 CREATE VIEW VUserAndAccount AS
-SELECT User.firstName, User.lastName, Account.balance, User.userId, Account.accountId
-FROM UserAccount
-INNER JOIN User ON User.userId = UserAccount.userId
-INNER JOIN Account ON UserAccount.accountId = Account.accountId;
+    SELECT User.firstName, User.lastName, Account.balance, User.userId, Account.accountId
+    FROM UserAccount
+    INNER JOIN User ON User.userId = UserAccount.userId
+    INNER JOIN Account ON UserAccount.accountId = Account.accountId;
 
-END$$
+END$$ -- End of procedure createdatabase
 
 
 
 DROP PROCEDURE IF EXISTS `filldatabase`$$
 CREATE PROCEDURE `filldatabase` ()
-
 BEGIN
 
 INSERT INTO User
@@ -152,10 +149,9 @@ VALUES
     (13, 10),
     (10, 13);
 
-END$$
+END$$ -- End of procedure filldatabase
 
 DELIMITER ;
 
 CALL createdatabase;
-USE Internetbanken;
 CALL filldatabase;
