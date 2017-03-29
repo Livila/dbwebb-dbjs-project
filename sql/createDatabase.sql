@@ -16,7 +16,7 @@ CREATE TABLE User (
     street CHAR(30) NOT NULL,
     zip INT(5) UNSIGNED ZEROFILL NOT NULL,
     city CHAR(20) NOT NULL,
-    phone CHAR(12)
+    phone CHAR(12) UNIQUE
 );
 
 CREATE TABLE Account (
