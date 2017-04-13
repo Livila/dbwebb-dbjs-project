@@ -115,6 +115,23 @@ SELECT * FROM VUserAndAccount ORDER BY userId;
 };
 
 /**
+ * Display specific user
+ */
+sql.showSpecUser = (userid) => {
+    var sql = `
+    SELECT * FROM VUserAndAccount WHERE userId = ` + userid +
+    `;`;
+
+    var prettyPrint = (res) => {
+        res.forEach((row, count) => {
+            console.log(`${count} [user ${row.userId}][account ${row.accountId}]: ${row.firstName} ${row.lastName} - ${row.balance}kr`);
+        });
+    };
+
+    return queryPromise(sql, prettyPrint);
+}
+
+/**
  * Export module
  */
 module.exports = sql;
