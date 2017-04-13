@@ -131,6 +131,46 @@ sql.showSpecUser = (userid) => {
     return queryPromise(sql, prettyPrint);
 }
 
+/*
+ *
+ */
+sql.moveMoney = (userId, usercode, from_accountnr, amount, to_accountnr) = {
+    var sql = `
+    UPDATE VUserAndAccount SET balance = balance - ` +amount + ` WHERE accountId =` + from_accountnr + 
+    `; 
+    UPDATE VUserAndAccount SET balance = balance + ` + amount + ` WHere accountId =` + to_accountnr + `;`;
+
+    var sql2 = `
+    SELECT balance FROM VUserAndAccount WHERE accountId = ` + from_account+`;`
+
+    var getIfUserHaveEnoughMoney = (res) => {
+        res.forEach((row, count) => {
+            var enoughMoney = `${row.balance}`
+            
+            if (enoughMoney > )
+        })
+        
+    }
+    
+    var sql2 = `
+    SELECT balance FROM VUserAndAccount WHERE accountId = ` + to_accountnr+`;`
+    //if the sql returns null the account is inactive
+    
+    return new Promise((resolve, reject) => {
+        connection.query(sql, (err, res) => {
+            if (err) {
+                reject(err);
+            }
+            if ()
+            prettyPrint(res);
+            resolve();
+        });
+    });
+    
+    return queryPromise(sql, prettyPrint);
+}
+
+
 /**
  * Export module
  */
