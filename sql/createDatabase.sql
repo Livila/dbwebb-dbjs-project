@@ -56,7 +56,59 @@ CREATE VIEW VUserAndAccount AS
 
 END$$ -- End of procedure createdatabase
 
+-- move money procedure 
+-- sheck if work
+DROP PROCEDURE moveMoney;
 
+DELIMITER //
+
+CREATE PROCEDURE moveMoney(
+	-- userId  INT,
+	-- usercode INT,
+	from_accountnr INT,
+	amount INT,
+	to_accountnr INT
+)
+
+BEGIN
+	DECLARE currentBalance NUMERIC(4, 2);
+    DECLARE toAccountStatus NUMERIC(4, 2);
+    
+    START TRANSACTION;
+	
+    SET toAccountStatus = (SELECT balance FROM Account WHERE accountId = to_accountnr);
+	SET currentBalance = (SELECT balance FROM Account WHERE accountId = from_accountnr);
+    SELECT currentBalance;
+
+	IF currentBalance - amount < 0 THEN
+		ROLLBACK;
+        SELECT "Amount on the account is not enough to make transaction.";
+
+	ELSE IF toAccountStatus = null THEN
+		ROLLBACK;
+        SELECT "Resiving account not found";
+    ELSE 
+
+		UPDATE UserAccount 
+		SET
+			balance = balance + amount
+		WHERE
+			accountId = to_accountId;
+
+		UPDATE UserAccount 
+		SET
+			balance = balance - amount
+		WHERE
+			accountId = from_accountnr;
+			
+		COMMIT;
+
+    END IF;
+
+    SELECT * FROM Account;
+END 
+
+DELIMITER ;
 
 DROP PROCEDURE IF EXISTS `filldatabase`$$
 CREATE PROCEDURE `filldatabase` ()
