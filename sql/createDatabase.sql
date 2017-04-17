@@ -58,6 +58,7 @@ END$$ -- End of procedure createdatabase
 
 -- move money procedure 
 -- sheck if work
+
 DROP PROCEDURE moveMoney;
 
 DELIMITER //
@@ -78,22 +79,32 @@ BEGIN
 	
     SET toAccountStatus = (SELECT balance FROM Account WHERE accountId = to_accountnr);
 	SET currentBalance = (SELECT balance FROM Account WHERE accountId = from_accountnr);
+
     SELECT currentBalance;
 
 	IF currentBalance - amount < 0 THEN
 		ROLLBACK;
         SELECT "Amount on the account is not enough to make transaction.";
 
-	ELSE IF toAccountStatus = null THEN
+	
+	END IF;
+    SELECT toAccountStatus;
+    IF toAccountStatus = NULL THEN
 		ROLLBACK;
         SELECT "Resiving account not found";
     ELSE 
-
+		
+        UPDATE userAccount
+        SET
+			balance = balance + (amount * 0.3)
+		WHERE 
+			accountId = 1;
+        
 		UPDATE UserAccount 
 		SET
-			balance = balance + amount
+			balance = balance + (amount * 0.97) 
 		WHERE
-			accountId = to_accountId;
+			accountId = to_accountnr;
 
 		UPDATE UserAccount 
 		SET
@@ -107,6 +118,8 @@ BEGIN
 
     SELECT * FROM Account;
 END 
+
+//
 
 DELIMITER ;
 
