@@ -123,6 +123,54 @@ END
 
 DELIMITER ;
 
+--switch money with the help of moveMoney procedure
+
+DROP PROCEDURE swichMoney;
+
+DELIMITER //
+
+CREATE PROCEDURE swichMoney(
+	-- userId  INT,
+	-- usercode INT,
+	from_accountnr INT,
+	amount NUMERIC(4, 2),
+	to_accountnr INT
+)
+ 
+BEGIN
+
+CALL moveMoney(from_accountnr, amount, to_accountnr, 0.05);
+
+END
+
+//
+
+DELIMITER ;
+
+--move money with the web interface with the help of moveMoney procedure
+
+DROP PROCEDURE webMoveMoney;
+
+DELIMITER //
+
+CREATE PROCEDURE webMoveMoney(
+	-- userId  INT,
+	-- usercode INT,
+	from_accountnr INT,
+	amount NUMERIC(4, 2),
+	to_accountnr INT
+)
+ 
+BEGIN
+
+CALL moveMoney(from_accountnr, amount, to_accountnr, 0.03);
+
+END
+
+//
+
+DELIMITER ;
+
 DROP PROCEDURE IF EXISTS `filldatabase`$$
 CREATE PROCEDURE `filldatabase` ()
 BEGIN
