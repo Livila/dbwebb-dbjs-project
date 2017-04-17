@@ -67,7 +67,7 @@ CREATE PROCEDURE moveMoney(
 	-- userId  INT,
 	-- usercode INT,
 	from_accountnr INT,
-	amount INT,
+	amount NUMERIC(4, 2),
 	to_accountnr INT
 )
 
@@ -94,23 +94,23 @@ BEGIN
         SELECT "Resiving account not found";
     ELSE 
 		
-        UPDATE userAccount
+        UPDATE Account
         SET
-			balance = balance + (amount * 0.3)
+			balance = balance + (amount * 0.03)
 		WHERE 
 			accountId = 1;
         
-		UPDATE UserAccount 
+		UPDATE Account 
 		SET
 			balance = balance + (amount * 0.97) 
 		WHERE
-			accountId = to_accountnr;
+			accountNr = to_accountnr;
 
-		UPDATE UserAccount 
+		UPDATE Account 
 		SET
 			balance = balance - amount
 		WHERE
-			accountId = from_accountnr;
+			accountNr = from_accountnr;
 			
 		COMMIT;
 
