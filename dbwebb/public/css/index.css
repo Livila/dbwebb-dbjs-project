@@ -1,0 +1,28 @@
+body {
+    text-align: center;
+    font-family: monospace;
+    font-size: 16px;
+}
+#startpagetable {
+    margin-left: 35%;
+    margin-right: 35%;
+    padding: 1em;
+    border-radius: 9px;
+    margin-bottom: 50px;
+}
+#loginbd, #swishbd {
+    text-align: center;
+    font-family: monospace;
+    font-size: 16px;
+    font-weight: bold;
+}
+#indexbd {
+    text-align: center;
+    font-family: monospace;
+    font-size: 24px;
+}
+footer {
+    margin-top: 100px;
+    font-weight: bold;
+    font-size: 12px;
+}

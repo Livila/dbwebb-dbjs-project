@@ -1,0 +1,33 @@
+include incl/header.pug
+
+body
+if object
+    
+    p Välkommen till Internetbanken!
+    p= object.name
+    <div id="startpagetable">
+        <table>
+            <tr><th>Kontonummer</th><th>Saldo</th></tr>
+            each row, rownum in resultset
+                tr
+                    td= row.accnr
+                    td= row.balance
+        </table>
+    </div>
+    
+    p Här har du möjligheten att föra över pengar mellan dina konton!
+    <div id=movemoneybd>
+        <form method="post" action="/movemoney">
+            <input type="hidden" name="userid" value="#{object.userid}">
+            <input type="hidden" name="usercode" value="#{object.usercode}">
+            <input type="hidden" name="code" value="#{object.code}">
+            <p>Kontonummer FRÅN: <input type="text" name="fromaccountnr" value=""></p>
+            <p>Total Summa: <input type="text" name="amount" value=""></p>
+            <p>Kontonummer TILL: <input type="text" name="toaccountnr" value=""></p>
+            <input type="submit" name="MoveMoney" value="Flytta pengar">
+        </form>
+    </div>
+else
+    p Bad login
+
+include incl/footer.pug

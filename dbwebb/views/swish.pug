@@ -1,0 +1,15 @@
+include incl/header.pug
+
+body
+    <div id="swishbd">
+        <form method="post" action="/movemoney">
+            <p>Användareid: <input type="text" name="userid" value=""></p> 
+            <p>Pin-kod: <input type="password" name="usercode" value=""></p>
+            <p>Kontonummer FRÅN: <input type="text" name="from_accountnr" value=""></p>
+            <p>Total Summa: <input type="text" name="amount" value=""></p>
+            <p>Kontonummer TILL: <input type="text" name="to_accountnr" value=""></p>
+            <input type="submit" name="swishMoney" value="Swisha pengar">
+        </form>
+    </div>
+
+include incl/footer.pug
