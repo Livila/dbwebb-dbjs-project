@@ -32,7 +32,7 @@ CREATE TABLE User (
 
 CREATE TABLE Account (
     accountId INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
-    accountNr CHAR(16) NOT NULL,
+    accountNr CHAR(9) NOT NULL,
     expireMonth INT(2),
     expireYear INT(4),
     accountCVC INT(3) UNSIGNED ZEROFILL,
@@ -59,6 +59,7 @@ END$$ -- End of procedure createdatabase
 -- move money procedure 
 -- sheck if work
 
+
 DROP PROCEDURE moveMoney;
 
 DELIMITER //
@@ -68,45 +69,71 @@ CREATE PROCEDURE moveMoney(
 	-- usercode INT,
 	from_accountnr INT,
 	amount NUMERIC(4, 2),
-	to_accountnr INT
+	to_accountnr INT,
+    percentToUs NUMERIC(4,2)
 )
-
+ 
 BEGIN
 	DECLARE currentBalance NUMERIC(4, 2);
     DECLARE toAccountStatus NUMERIC(4, 2);
     
     START TRANSACTION;
 	
-    SET toAccountStatus = (SELECT balance FROM Account WHERE accountId = to_accountnr);
-	SET currentBalance = (SELECT balance FROM Account WHERE accountId = from_accountnr);
+    SET toAccountStatus = (SELECT balance FROM Account WHERE accountNr = to_accountnr);
+	SET currentBalance = (SELECT balance FROM Account WHERE accountNr = from_accountnr);
+	
+    SELECT currentBalance, toAccountStatus;
+	-- SELECT toAccountStatus;
 
-    SELECT currentBalance;
-
-	IF currentBalance - amount < 0 THEN
+	IF (currentBalance - amount) < 0 THEN
 		ROLLBACK;
         SELECT "Amount on the account is not enough to make transaction.";
-
-	
-	END IF;
-    SELECT toAccountStatus;
-    IF toAccountStatus = NULL THEN
+        
+    ELSEIF toAccountStatus = NULL  THEN
 		ROLLBACK;
         SELECT "Resiving account not found";
     ELSE 
+		CALL MoveMoney2(from_accountnr, amount, to_accountnr, percentToUs);
+
+    END IF;
+	
+    -- SELECT * FROM Account;
+END 
+
+//
+
+DELIMITER ;
+
+DROP PROCEDURE MoveMoney2;
+
+DELIMITER //
+
+CREATE PROCEDURE MoveMoney2(
+	-- userId  INT,
+	-- usercode INT,
+	from_accountnr INT,
+	amount NUMERIC(4, 2),
+	to_accountnr INT,
+    percentToUs NUMERIC(4, 2)
+)
+ 
+BEGIN
+	
+    
 		
-        UPDATE Account
-        SET
-			balance = balance + (amount * 0.03)
-		WHERE 
-			accountId = 1;
-        
-		UPDATE Account 
+	UPDATE Account 
 		SET
-			balance = balance + (amount * 0.97) 
+			balance = balance + (amount * (1 - percentToUs)) 
 		WHERE
 			accountNr = to_accountnr;
-
-		UPDATE Account 
+	
+	UPDATE Account
+        SET
+			balance = balance + (amount * percentToUs)
+		WHERE 
+			accountId = 1;
+            
+	UPDATE Account 
 		SET
 			balance = balance - amount
 		WHERE
@@ -114,14 +141,12 @@ BEGIN
 			
 		COMMIT;
 
-    END IF;
-
-    SELECT * FROM Account;
-END 
+END
 
 //
 
 DELIMITER ;
+
 
 --switch money with the help of moveMoney procedure
 
@@ -203,27 +228,27 @@ VALUES
 INSERT INTO Account
     (accountNr, expireMonth, expireYear, accountCVC, balance)
 VALUES
-    ('5285415127177850', 11, 2018, 135, 0),
-    ('5379026026843638', 2, 2020, 200, 0),
-    ('4556888485452823', 2, 2019, 603, 0),
-    ('4485008559351951', 7, 2020, 573, 0),
-    ('4929160689171173', 2, 2022, 010, 0),
-    ('4485833035399658', 11, 2018, 657, 0),
-    ('4532500237478092', 2, 2020, 401, 0),
-    ('5321570040216486', 1, 2018, 693, 0),
-    ('5521863023006539', 10, 2020, 531, 0),
-    ('4556658461192275', 8, 2019, 235, 0),
-    ('4556526957179207', 5, 2019, 095, 0),
-    ('4916354791700657', 6, 2019, 045, 0),
-    ('4539430653774191', 7, 2018, 087, 0),
-    ('4916417118182022', 5, 2022, 277, 0),
-    ('5296459010695203', 6, 2022, 489, 0),
-    ('4532870059135702', 1, 2021, 384, 0),
-    ('4916678674933740', 10, 2020, 744, 0),
-    ('5217858613379816', 6, 2021, 936, 0),
-    ('5301348860764131', 8, 2019, 643, 0),
-    ('4556884132140424', 1, 2022, 578, 0),
-    ('4929127317239714', 10, 2022, 127, 0);
+    ('528541516', 11, 2018, 135, 0),
+    ('537902605', 2, 2020, 200, 0),
+    ('455688844', 2, 2019, 603, 0),
+    ('448500853', 7, 2020, 573, 0),
+    ('492916062', 2, 2022, 010, 0),
+    ('448583311', 11, 2018, 657, 0),
+    ('453250010', 2, 2020, 401, 0),
+    ('532157009', 1, 2018, 693, 0),
+    ('552186308', 10, 2020, 531, 0),
+    ('455665847', 8, 2019, 235, 0),
+    ('455652696', 5, 2019, 095, 0),
+    ('491635475', 6, 2019, 045, 0),
+    ('453943064', 7, 2018, 087, 0),
+    ('491641743', 5, 2022, 277, 0),
+    ('529645901', 6, 2022, 489, 0),
+    ('453287001', 1, 2021, 384, 0),
+    ('491667862', 10, 2020, 744, 0),
+    ('521785861', 6, 2021, 936, 0),
+    ('530134881', 8, 2019, 643, 0),
+    ('455688411', 1, 2022, 578, 0),
+    ('492912731', 10, 2022, 127, 0);
 
 INSERT INTO UserAccount
     (userId, accountId)
