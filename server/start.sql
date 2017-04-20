@@ -81,9 +81,9 @@ BEGIN
 	DECLARE currentBalance NUMERIC(4, 2);
     DECLARE toAccountStatus NUMERIC(4, 2);
     DECLARE percAmount DECIMAL(7,2);
-    
+
     START TRANSACTION;
-	
+
     SET toAccountStatus = (SELECT balance FROM Account WHERE accountId LIKE toaccountnr);
 	SET currentBalance = (SELECT balance FROM Account WHERE accountId LIKE fromaccountnr);
     SET percAmount = amount * 0.97;
@@ -93,23 +93,23 @@ BEGIN
 		ROLLBACK;
         SELECT "Amount on the account is not enough to make the transaction.";
 
-	ELSE IF toAccountStatus = null THEN
+	ELSEIF toAccountStatus = null THEN
 		ROLLBACK;
         SELECT "Recieving account not found";
-    ELSE 
+    ELSE
 
-		UPDATE Account 
+		UPDATE Account
 		SET
 			balance = balance + percAmount
 		WHERE
 			accountNr = toaccountnr;
 
-		UPDATE Account 
+		UPDATE Account
 		SET
 			balance = balance - amount
 		WHERE
 			accountNr = fromaccountnr;
-		
+
         UPDATE Bank
 		SET
 			balance = balance + (amount - percAmount)
@@ -117,8 +117,7 @@ BEGIN
 		COMMIT;
 
     END IF;
-	END IF;
-    
+
 END
 //
 
