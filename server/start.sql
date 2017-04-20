@@ -71,57 +71,104 @@ DROP PROCEDURE IF EXISTS moveMoney;
 DELIMITER //
 
 CREATE PROCEDURE moveMoney(
-    userId INTEGER,
-    usercode INTEGER,
-    fromaccountnr NUMERIC(16,0),
-    amount INTEGER,
-    toaccountnr NUMERIC(16,0)
+
+	userId INTEGER,
+	usercode INTEGER,
+	fromaccountnr NUMERIC(16,0),
+	amount INTEGER,
+	toaccountnr NUMERIC(16,0),
+    percentToUs NUMERIC(16, 0)
 )
 BEGIN
-    DECLARE currentBalance NUMERIC(4, 2);
+	DECLARE currentBalance NUMERIC(4, 2);
     DECLARE toAccountStatus NUMERIC(4, 2);
     DECLARE percAmount DECIMAL(7,2);
-
+    
     START TRANSACTION;
-
-    SET toAccountStatus = (SELECT balance FROM Account WHERE accountId LIKE toaccountnr);
-    SET currentBalance = (SELECT balance FROM Account WHERE accountId LIKE fromaccountnr);
-    SET percAmount = amount * 0.97;
+	
+    SET toAccountStatus = (SELECT balance FROM Account WHERE accountNr LIKE toaccountnr);
+	SET currentBalance = (SELECT balance FROM Account WHERE accountNr LIKE fromaccountnr AND accountId LIKE userId);
+    SET percAmount = amount * 1 - percentToUs;
     SELECT currentBalance;
 
-    IF currentBalance - amount < 0 THEN
-        ROLLBACK;
+	IF currentBalance - amount < 0 THEN
+		ROLLBACK;
         SELECT "Amount on the account is not enough to make the transaction.";
 
-    ELSEIF toAccountStatus = null THEN
-        ROLLBACK;
+	ELSE IF toAccountStatus = null THEN
+		ROLLBACK;
         SELECT "Recieving account not found";
-    ELSE
+    ELSE 
 
-        UPDATE Account
-        SET
-            balance = balance + percAmount
-        WHERE
-            accountNr = toaccountnr;
+		UPDATE Account 
+		SET
+			balance = balance + percAmount
+		WHERE
+			accountNr = toaccountnr;
 
-        UPDATE Account
-        SET
-            balance = balance - amount
-        WHERE
-            accountNr = fromaccountnr;
-
+		UPDATE Account 
+		SET
+			balance = balance - amount
+		WHERE
+			accountNr = fromaccountnr;
+		
         UPDATE Bank
-        SET
-            balance = balance + (amount - percAmount)
-        WHERE id LIKE 1;
-        COMMIT;
+		SET
+			balance = balance + (amount - percAmount)
+		WHERE id LIKE 1;
+		COMMIT;
 
     END IF;
-
+	END IF;
+    
 END
 //
 
 DELIMITER ;
+
+/*
+* adding the percent statment to move money
+*/
+DROP PROCEDURE IF EXISTS swichMoney;
+
+DELIMITER //
+
+CREATE PROCEDURE swichMoney(
+	userId INTEGER,
+	usercode INTEGER,
+	fromaccountnr NUMERIC(16,0),
+	amount INTEGER,
+	toaccountnr NUMERIC(16,0)
+    )
+    BEGIN
+    CALL moveMoney(userId, usercode, fromaccountnr, amount, toaccountnr, 0.05);
+    END
+//
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS webMoveMoney;
+
+DELIMITER //
+
+/* 
+*  adding the percent statment to move money
+*/ 
+
+CREATE PROCEDURE webMoveMoney(
+	userId INTEGER,
+	usercode INTEGER,
+	fromaccountnr NUMERIC(16,0),
+	amount INTEGER,
+	toaccountnr NUMERIC(16,0)
+    )
+    BEGIN
+    CALL moveMoney(userId, usercode, fromaccountnr, amount, toaccountnr, 0.03);
+    END
+//
+DELIMITER ;
+
+	
+
 
 DROP PROCEDURE IF EXISTS filldatabase;
 
