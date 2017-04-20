@@ -19,8 +19,8 @@ DROP TABLE IF EXISTS User;
 DROP TABLE IF EXISTS Bank;
 
 CREATE TABLE Bank (
-	id INTEGER AUTO_INCREMENT PRIMARY KEY NOT NULL,
-	balance INTEGER,
+    id INTEGER AUTO_INCREMENT PRIMARY KEY NOT NULL,
+    balance INTEGER,
     interest DECIMAL(3,2)
 );
 
@@ -71,50 +71,50 @@ DROP PROCEDURE IF EXISTS moveMoney;
 DELIMITER //
 
 CREATE PROCEDURE moveMoney(
-	userId INTEGER,
-	usercode INTEGER,
-	fromaccountnr NUMERIC(16,0),
-	amount INTEGER,
-	toaccountnr NUMERIC(16,0)
+    userId INTEGER,
+    usercode INTEGER,
+    fromaccountnr NUMERIC(16,0),
+    amount INTEGER,
+    toaccountnr NUMERIC(16,0)
 )
 BEGIN
-	DECLARE currentBalance NUMERIC(4, 2);
+    DECLARE currentBalance NUMERIC(4, 2);
     DECLARE toAccountStatus NUMERIC(4, 2);
     DECLARE percAmount DECIMAL(7,2);
 
     START TRANSACTION;
 
     SET toAccountStatus = (SELECT balance FROM Account WHERE accountId LIKE toaccountnr);
-	SET currentBalance = (SELECT balance FROM Account WHERE accountId LIKE fromaccountnr);
+    SET currentBalance = (SELECT balance FROM Account WHERE accountId LIKE fromaccountnr);
     SET percAmount = amount * 0.97;
     SELECT currentBalance;
 
-	IF currentBalance - amount < 0 THEN
-		ROLLBACK;
+    IF currentBalance - amount < 0 THEN
+        ROLLBACK;
         SELECT "Amount on the account is not enough to make the transaction.";
 
-	ELSEIF toAccountStatus = null THEN
-		ROLLBACK;
+    ELSEIF toAccountStatus = null THEN
+        ROLLBACK;
         SELECT "Recieving account not found";
     ELSE
 
-		UPDATE Account
-		SET
-			balance = balance + percAmount
-		WHERE
-			accountNr = toaccountnr;
+        UPDATE Account
+        SET
+            balance = balance + percAmount
+        WHERE
+            accountNr = toaccountnr;
 
-		UPDATE Account
-		SET
-			balance = balance - amount
-		WHERE
-			accountNr = fromaccountnr;
+        UPDATE Account
+        SET
+            balance = balance - amount
+        WHERE
+            accountNr = fromaccountnr;
 
         UPDATE Bank
-		SET
-			balance = balance + (amount - percAmount)
-		WHERE id LIKE 1;
-		COMMIT;
+        SET
+            balance = balance + (amount - percAmount)
+        WHERE id LIKE 1;
+        COMMIT;
 
     END IF;
 
