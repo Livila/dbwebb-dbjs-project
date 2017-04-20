@@ -1,5 +1,10 @@
 # dbwebb-dbjs-project
 
+## Dependencies
+`npm install body-parser`
+`npm install express`
+`npm install mysql`
+
 ## MySQL
 
 Run the command "npm install mysql" in the main directory.
@@ -9,6 +14,10 @@ Run the command "npm install mysql" in the main directory.
 Run the command "chmod 755 [filename]", change "[filename]" to the file you want to make runnable.
 
 Use either the mode 755 or 744. 755 will make it runnable on all users and 744 will make it runnable on the current user only.
+
+## Git Interface for Windows
+
+https://gitextensions.github.io/
 
 ## Some Git Commands
 
