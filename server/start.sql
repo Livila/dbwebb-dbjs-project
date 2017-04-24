@@ -20,6 +20,25 @@ DROP TABLE IF EXISTS Account;
 DROP TABLE IF EXISTS User;
 DROP TABLE IF EXISTS Bank;
 
+CREATE TABLE CustomerLog (
+    id INTEGER AUTO_INCREMENT PRIMARY KEY NOT NULL,
+    bankLogId INTEGER NOT NULL,
+    info CHAR(20),
+
+    FOREIGN KEY (bankLogId) REFERENCES BankLog(id)
+);
+
+CREATE TABLE BankLog (
+    id INTEGER AUTO_INCREMENT PRIMARY KEY NOT NULL,
+    dateAdded DATETIME DEFAULT CURRENT_TIMESTAMP,
+    accountNrTo NUMERIC(16, 0) NOT NULL,
+    accountNrFrom NUMBER(16, 0) NOT NULL,
+    amountSent NUMERIC(16, 3) NOT NULL,
+
+    FOREIGN KEY (accountNrTo) REFERENCES Account(accountNr),
+    FOREIGN KEY (accountNrFrom) REFERENCES Account(accountNr)
+);
+
 CREATE TABLE Bank (
     id INTEGER AUTO_INCREMENT PRIMARY KEY NOT NULL,
     balance INTEGER,
@@ -65,6 +84,16 @@ CREATE VIEW VUserAndAccount AS
 
 END
 // -- End of procedure createdatabase
+
+/*
+DROP TRIGGER IF EXISTS LogTransactions;
+
+CREATE TRIGGER LogTransactions
+AFTER UPDATE
+ON Account FOR EACH ROW
+    INSERT INTO BankLog(accountNrTo, accountNrFrom, amountSent)
+        VALUES (NEW.accountNrTo, NEW.accountNrFrom, NEW.balance - OLD.balance)
+*/
 
 DELIMITER ;
 
@@ -191,15 +220,13 @@ CREATE PROCEDURE webMoveMoney(
 //
 DELIMITER ;
 
-    
 
 
 DROP PROCEDURE IF EXISTS filldatabase;
 
 DELIMITER //
 
-CREATE PROCEDURE filldatabase(
-)
+CREATE PROCEDURE filldatabase()
 BEGIN
 
 INSERT INTO Bank (balance, interest) VALUES (0, 1.45);
