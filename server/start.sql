@@ -13,6 +13,8 @@ CREATE PROCEDURE createdatabase(
 )
 BEGIN
 -- Drop tables in reverse order.
+DROP TABLE IF EXISTS CustomerLog;
+DROP TABLE IF EXISTS BankLog;
 DROP TABLE IF EXISTS UserAccount;
 DROP TABLE IF EXISTS Account;
 DROP TABLE IF EXISTS User;
@@ -74,53 +76,71 @@ CREATE PROCEDURE moveMoney(
 
 	userId INTEGER,
 	usercode INTEGER,
-	fromaccountnr NUMERIC(16,0),
+	fromaccountnr NUMERIC(16, 0),
 	amount INTEGER,
-	toaccountnr NUMERIC(16,0),
-    percentToUs NUMERIC(16, 0)
+	toaccountnr NUMERIC(16, 0),
+    percentToUs NUMERIC(3, 2)
 )
 BEGIN
-	DECLARE currentBalance NUMERIC(4, 2);
-    DECLARE toAccountStatus NUMERIC(4, 2);
-    DECLARE percAmount DECIMAL(7,2);
-    
-    START TRANSACTION;
-	
-    SET toAccountStatus = (SELECT balance FROM Account WHERE accountNr LIKE toaccountnr);
-	SET currentBalance = (SELECT balance FROM Account WHERE accountNr LIKE fromaccountnr AND accountId LIKE userId);
-    SET percAmount = amount * 1 - percentToUs;
-    SELECT currentBalance;
+	DECLARE fromAccountBalance NUMERIC(7, 2); -- Note, number can be 5 in length and 2 decimals.
+    DECLARE toAccountBalance NUMERIC(7, 2);
 
-	IF currentBalance - amount < 0 THEN
+    START TRANSACTION;
+
+    -- Check if user has access to account
+    IF (
+        (SELECT COUNT(accountId)
+            FROM UserAccount
+            WHERE UserAccount.userId = userId
+            AND (
+                SELECT accountId FROM Account WHERE Account.accountNr = fromaccountnr
+            )) = 0
+        ) THEN
+        ROLLBACK;
+    END IF;
+
+    -- Is correct pin code.
+    IF (SELECT pinCode FROM User WHERE User.userId = userId AND User.pinCode != usercode) THEN
+        ROLLBACK;
+    END IF;
+
+
+    SET toAccountBalance = (SELECT balance FROM Account WHERE accountNr LIKE toaccountnr);
+	SET fromAccountBalance = (SELECT balance FROM Account WHERE accountNr LIKE fromaccountnr);
+
+    IF fromAccountBalance is NULL THEN
+		ROLLBACK;
+        SELECT "Sending account not found!";
+    ELSEIF toAccountBalance is NULL THEN
+		ROLLBACK;
+        SELECT "Recieving account not found!";
+	ELSEIF fromAccountBalance - amount < 0 THEN
 		ROLLBACK;
         SELECT "Amount on the account is not enough to make the transaction.";
+    ELSE
 
-	ELSE IF toAccountStatus = null THEN
-		ROLLBACK;
-        SELECT "Recieving account not found";
-    ELSE 
-
-		UPDATE Account 
+		UPDATE Account
 		SET
-			balance = balance + percAmount
+			balance = balance + (amount * (1 - percentToUs))
 		WHERE
 			accountNr = toaccountnr;
 
-		UPDATE Account 
+		UPDATE Account
 		SET
 			balance = balance - amount
 		WHERE
 			accountNr = fromaccountnr;
-		
+
         UPDATE Bank
 		SET
-			balance = balance + (amount - percAmount)
+			balance = balance + (amount * percentToUs)
 		WHERE id LIKE 1;
 		COMMIT;
 
-    END IF;
 	END IF;
-    
+
+    SELECT fromAccountBalance AS FromAccount, toAccountBalance AS ToAccount, (amount * percentToUs) AS BankRecieved;
+
 END
 //
 
