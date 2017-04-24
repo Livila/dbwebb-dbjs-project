@@ -11,6 +11,7 @@ DELIMITER //
 
 CREATE PROCEDURE createdatabase()
 BEGIN
+
 -- Drop tables in reverse order.
 DROP TABLE IF EXISTS CustomerLog;
 DROP TABLE IF EXISTS BankLog;
@@ -20,16 +21,15 @@ DROP TABLE IF EXISTS User;
 DROP TABLE IF EXISTS Bank;
 
 CREATE TABLE Bank (
-    id INTEGER AUTO_INCREMENT PRIMARY KEY NOT NULL,
+    id INTEGER AUTO_INCREMENT PRIMARY KEY,
     balance INTEGER,
     interest DECIMAL(3,2)
 );
 
 CREATE TABLE User (
-    userId INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
+    userId INT AUTO_INCREMENT PRIMARY KEY,
     pinCode INT(4) UNSIGNED ZEROFILL NOT NULL,
--- Format: YYMMDDXXXX
-    civicNumber CHAR(10) UNIQUE NOT NULL,
+    civicNumber CHAR(10) UNIQUE NOT NULL, -- Format: YYMMDDXXXX
     firstName CHAR(20) NOT NULL,
     lastName CHAR(20) NOT NULL,
     street CHAR(30) NOT NULL,
@@ -39,12 +39,14 @@ CREATE TABLE User (
 );
 
 CREATE TABLE Account (
-    accountId INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
-    accountNr NUMERIC(16, 0) UNIQUE NOT NULL,
+    accountId INT AUTO_INCREMENT,
+    accountNr NUMERIC(16, 0),
     expireMonth INT(2),
     expireYear INT(4),
     accountCVC INT(3) UNSIGNED ZEROFILL,
-    balance INT
+    balance INT,
+
+    PRIMARY KEY (accountId, accountNr)
 );
 
 CREATE TABLE UserAccount (
@@ -56,7 +58,7 @@ CREATE TABLE UserAccount (
 );
 
 CREATE TABLE BankLog (
-    id INTEGER AUTO_INCREMENT PRIMARY KEY NOT NULL,
+    id INTEGER AUTO_INCREMENT PRIMARY KEY,
     dateAdded DATETIME,
     accountNrTo NUMERIC(16, 0) NOT NULL,
     accountNrFrom NUMERIC(16, 0) NOT NULL,
@@ -67,11 +69,13 @@ CREATE TABLE BankLog (
 );
 
 CREATE TABLE CustomerLog (
-    id INTEGER AUTO_INCREMENT PRIMARY KEY NOT NULL,
+    id INTEGER AUTO_INCREMENT PRIMARY KEY,
+    userId INTEGER NOT NULL,
     bankLogId INTEGER NOT NULL,
     info CHAR(20),
 
-    FOREIGN KEY (bankLogId) REFERENCES BankLog(id)
+    FOREIGN KEY (bankLogId) REFERENCES BankLog(id),
+    FOREIGN KEY (userId) REFERENCES User(userId)
 );
 
 -- Create view
@@ -85,15 +89,6 @@ CREATE VIEW VUserAndAccount AS
 END
 // -- End of procedure createdatabase
 
-/*
-DROP TRIGGER IF EXISTS LogTransactions;
-
-CREATE TRIGGER LogTransactions
-AFTER UPDATE
-ON Account FOR EACH ROW
-    INSERT INTO BankLog(accountNrTo, accountNrFrom, amountSent)
-        VALUES (NEW.accountNrTo, NEW.accountNrFrom, NEW.balance - OLD.balance)
-*/
 
 DELIMITER ;
 
