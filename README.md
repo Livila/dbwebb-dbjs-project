@@ -1,5 +1,7 @@
 # dbwebb-dbjs-project
 
+This is a project we're making at Blekinge Institute of Technology.
+
 ## Dependencies
 `npm install body-parser`
 `npm install express`
@@ -56,5 +58,7 @@ Run "git help", "man git" or "git help everyday" for help and descriptions.
 #### WARNING: Be careful. Might do something unintended.
 
 - git reset HEAD
+
+- git reset HEAD~n, where n is a number
 
 - git checkout --
