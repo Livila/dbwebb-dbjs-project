@@ -87,36 +87,39 @@ BEGIN
 
     START TRANSACTION;
 
-    -- Check if user has access to account
-    IF (
-        (SELECT COUNT(accountId)
-            FROM UserAccount
-            WHERE UserAccount.userId = userId
-            AND (
-                SELECT accountId FROM Account WHERE Account.accountNr = fromaccountnr
-            )) = 0
-        ) THEN
-        ROLLBACK;
-    END IF;
-
-    -- Is correct pin code.
-    IF (SELECT pinCode FROM User WHERE User.userId = userId AND User.pinCode != usercode) THEN
-        ROLLBACK;
-    END IF;
-
-
     SET toAccountBalance = (SELECT balance FROM Account WHERE accountNr LIKE toaccountnr);
     SET fromAccountBalance = (SELECT balance FROM Account WHERE accountNr LIKE fromaccountnr);
 
-    IF fromAccountBalance is NULL THEN
+    -- Check if user has access to account
+    IF (SELECT COUNT(accountId)
+        FROM UserAccount
+        WHERE UserAccount.userId = userId
+        AND (
+            SELECT accountId FROM Account WHERE Account.accountNr = fromaccountnr
+        ) = 0
+    ) THEN
+        ROLLBACK;
+
+    -- Is correct pin code.
+    ELSEIF (SELECT pinCode FROM User WHERE User.userId = userId) != usercode THEN
+        ROLLBACK;
+
+    -- Check if from account exists.
+    ELSEIF fromAccountBalance IS NULL THEN
         ROLLBACK;
         SELECT "Sending account not found!";
-    ELSEIF toAccountBalance is NULL THEN
+
+    -- Check if to account exists.
+    ELSEIF toAccountBalance IS NULL THEN
         ROLLBACK;
         SELECT "Recieving account not found!";
+
+    -- Check if from account has enough money.
     ELSEIF fromAccountBalance - amount < 0 THEN
         ROLLBACK;
         SELECT "Amount on the account is not enough to make the transaction.";
+
+    -- Transaction with money.
     ELSE
 
         UPDATE Account
@@ -139,6 +142,7 @@ BEGIN
 
     END IF;
 
+    -- For debug.
     SELECT fromAccountBalance AS FromAccount, toAccountBalance AS ToAccount, (amount * percentToUs) AS BankRecieved;
 
 END
