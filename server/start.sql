@@ -9,8 +9,7 @@ DROP PROCEDURE IF EXISTS createdatabase;
 
 DELIMITER //
 
-CREATE PROCEDURE createdatabase(
-)
+CREATE PROCEDURE createdatabase()
 BEGIN
 -- Drop tables in reverse order.
 DROP TABLE IF EXISTS CustomerLog;
@@ -19,25 +18,6 @@ DROP TABLE IF EXISTS UserAccount;
 DROP TABLE IF EXISTS Account;
 DROP TABLE IF EXISTS User;
 DROP TABLE IF EXISTS Bank;
-
-CREATE TABLE CustomerLog (
-    id INTEGER AUTO_INCREMENT PRIMARY KEY NOT NULL,
-    bankLogId INTEGER NOT NULL,
-    info CHAR(20),
-
-    FOREIGN KEY (bankLogId) REFERENCES BankLog(id)
-);
-
-CREATE TABLE BankLog (
-    id INTEGER AUTO_INCREMENT PRIMARY KEY NOT NULL,
-    dateAdded DATETIME DEFAULT CURRENT_TIMESTAMP,
-    accountNrTo NUMERIC(16, 0) NOT NULL,
-    accountNrFrom NUMBER(16, 0) NOT NULL,
-    amountSent NUMERIC(16, 3) NOT NULL,
-
-    FOREIGN KEY (accountNrTo) REFERENCES Account(accountNr),
-    FOREIGN KEY (accountNrFrom) REFERENCES Account(accountNr)
-);
 
 CREATE TABLE Bank (
     id INTEGER AUTO_INCREMENT PRIMARY KEY NOT NULL,
@@ -60,7 +40,7 @@ CREATE TABLE User (
 
 CREATE TABLE Account (
     accountId INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
-    accountNr CHAR(16) NOT NULL,
+    accountNr NUMERIC(16, 0) UNIQUE NOT NULL,
     expireMonth INT(2),
     expireYear INT(4),
     accountCVC INT(3) UNSIGNED ZEROFILL,
@@ -70,8 +50,28 @@ CREATE TABLE Account (
 CREATE TABLE UserAccount (
     userId INT NOT NULL,
     accountId INT NOT NULL,
+
     FOREIGN KEY (userId) REFERENCES User(userId),
     FOREIGN KEY (accountId) REFERENCES Account(accountId)
+);
+
+CREATE TABLE BankLog (
+    id INTEGER AUTO_INCREMENT PRIMARY KEY NOT NULL,
+    dateAdded DATETIME,
+    accountNrTo NUMERIC(16, 0) NOT NULL,
+    accountNrFrom NUMERIC(16, 0) NOT NULL,
+    amountSent NUMERIC(16, 3) NOT NULL,
+
+    FOREIGN KEY (accountNrTo) REFERENCES Account(accountNr),
+    FOREIGN KEY (accountNrFrom) REFERENCES Account(accountNr)
+);
+
+CREATE TABLE CustomerLog (
+    id INTEGER AUTO_INCREMENT PRIMARY KEY NOT NULL,
+    bankLogId INTEGER NOT NULL,
+    info CHAR(20),
+
+    FOREIGN KEY (bankLogId) REFERENCES BankLog(id)
 );
 
 -- Create view
@@ -104,34 +104,34 @@ DELIMITER //
 CREATE PROCEDURE moveMoney(
 
     userId INTEGER,
-    usercode INTEGER,
-    fromaccountnr NUMERIC(16, 0),
+    pinCode INTEGER,
+    fromAccountNr NUMERIC(16, 0),
     amount INTEGER,
-    toaccountnr NUMERIC(16, 0),
+    toAccountNr NUMERIC(16, 0),
     percentToUs NUMERIC(3, 2)
 )
 BEGIN
-    DECLARE fromAccountBalance NUMERIC(7, 2); -- Note, number can be 5 in length and 2 decimals.
-    DECLARE toAccountBalance NUMERIC(7, 2);
+    DECLARE fromAccountBalance NUMERIC(8, 3); -- Note, the number can be 5 in length and have 3 decimals.
+    DECLARE toAccountBalance NUMERIC(8, 3);
 
     START TRANSACTION;
 
-    SET toAccountBalance = (SELECT balance FROM Account WHERE accountNr LIKE toaccountnr);
-    SET fromAccountBalance = (SELECT balance FROM Account WHERE accountNr LIKE fromaccountnr);
+    SET toAccountBalance = (SELECT balance FROM Account WHERE accountNr LIKE toAccountNr);
+    SET fromAccountBalance = (SELECT balance FROM Account WHERE accountNr LIKE fromAccountNr);
 
     -- Check if user has access to account
-    IF (SELECT COUNT(accountId)
+    IF (SELECT accountId
         FROM UserAccount
         WHERE UserAccount.userId = userId
-        AND (
-            SELECT accountId FROM Account WHERE Account.accountNr = fromaccountnr
-        ) = 0
-    ) THEN
+            AND (SELECT accountId FROM Account WHERE Account.accountNr = fromAccountNr)
+    ) IS NULL THEN
         ROLLBACK;
+        SELECT "User does not own this account.";
 
-    -- Is correct pin code.
-    ELSEIF (SELECT pinCode FROM User WHERE User.userId = userId) != usercode THEN
+    -- Check if it's the correct pin code.
+    ELSEIF (SELECT pinCode FROM User WHERE User.userId = userId AND User.pinCode = pinCode) IS NULL THEN
         ROLLBACK;
+        SELECT "Wrong pin code!";
 
     -- Check if from account exists.
     ELSEIF fromAccountBalance IS NULL THEN
@@ -150,19 +150,21 @@ BEGIN
 
     -- Transaction with money.
     ELSE
-
+        -- Update recieving account balance.
         UPDATE Account
         SET
             balance = balance + (amount * (1 - percentToUs))
         WHERE
-            accountNr = toaccountnr;
+            accountNr = toAccountNr;
 
+        -- Update sending account balance.
         UPDATE Account
         SET
             balance = balance - amount
         WHERE
-            accountNr = fromaccountnr;
+            accountNr = fromAccountNr;
 
+        -- Update bank balance.
         UPDATE Bank
         SET
             balance = balance + (amount * percentToUs)
@@ -188,14 +190,14 @@ DELIMITER //
 
 CREATE PROCEDURE swishMoney(
     userId INTEGER,
-    usercode INTEGER,
-    fromaccountnr NUMERIC(16,0),
+    pinCode INTEGER,
+    fromAccountNr NUMERIC(16,0),
     amount INTEGER,
-    toaccountnr NUMERIC(16,0)
-    )
-    BEGIN
-    CALL moveMoney(userId, usercode, fromaccountnr, amount, toaccountnr, 0.05);
-    END
+    toAccountNr NUMERIC(16,0)
+)
+BEGIN
+    CALL moveMoney(userId, pinCode, fromAccountNr, amount, toAccountNr, 0.05);
+END
 //
 DELIMITER ;
 
@@ -203,20 +205,20 @@ DROP PROCEDURE IF EXISTS webMoveMoney;
 
 DELIMITER //
 
-/* 
+/*
 *  adding the percent statment to move money
-*/ 
+*/
 
 CREATE PROCEDURE webMoveMoney(
     userId INTEGER,
-    usercode INTEGER,
-    fromaccountnr NUMERIC(16,0),
+    pinCode INTEGER,
+    fromAccountNr NUMERIC(16,0),
     amount INTEGER,
-    toaccountnr NUMERIC(16,0)
-    )
-    BEGIN
-    CALL moveMoney(userId, usercode, fromaccountnr, amount, toaccountnr, 0.03);
-    END
+    toAccountNr NUMERIC(16,0)
+)
+BEGIN
+    CALL moveMoney(userId, pinCode, fromAccountNr, amount, toAccountNr, 0.03);
+END
 //
 DELIMITER ;
 
