@@ -116,8 +116,10 @@ CREATE VIEW VUserAndAccount AS
     FROM UserAccount
     INNER JOIN User ON User.userId = UserAccount.userId
     INNER JOIN Account ON UserAccount.accountId = Account.accountId;
+-- End of creating VUserAndAccount.
+
 END
-$$ -- End of creating VUserAndAccount.
+$$ -- End of procedure createdatabase
 
 
 
@@ -219,12 +221,12 @@ $$ -- End of procedure moveMoney
 
 /*
 -------------------------------------------------
----------- Create procedure swishMoney ----------
+---------- Create procedure moveMoneySwish ----------
 -------------------------------------------------
 */
 
-DROP PROCEDURE IF EXISTS swishMoney$$
-CREATE PROCEDURE swishMoney(
+DROP PROCEDURE IF EXISTS moveMoneySwish$$
+CREATE PROCEDURE moveMoneySwish(
     userId INTEGER,
     pinCode INTEGER,
     fromAccountNr NUMERIC(16,0),
@@ -234,17 +236,17 @@ CREATE PROCEDURE swishMoney(
 BEGIN
     CALL moveMoney(userId, pinCode, fromAccountNr, amount, toAccountNr, 0.05);
 END
-$$ -- End of procedure swishMoney
+$$ -- End of procedure moveMoneySwish
 
 
 /*
 -------------------------------------------------
---------- Create procedure webMoveMoney ---------
+--------- Create procedure moveMoneyWeb ---------
 -------------------------------------------------
 */
 
-DROP PROCEDURE IF EXISTS webMoveMoney;
-CREATE PROCEDURE webMoveMoney(
+DROP PROCEDURE IF EXISTS moveMoneyWeb$$
+CREATE PROCEDURE moveMoneyWeb(
     userId INTEGER,
     pinCode INTEGER,
     fromAccountNr NUMERIC(16,0),
@@ -254,7 +256,7 @@ CREATE PROCEDURE webMoveMoney(
 BEGIN
     CALL moveMoney(userId, pinCode, fromAccountNr, amount, toAccountNr, 0.03);
 END
-$$ -- End of procedure webMoveMoney
+$$ -- End of procedure moveMoneyWeb
 
 
 /*
