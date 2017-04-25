@@ -7,24 +7,43 @@ SET NAMES 'utf8';
 
 DROP PROCEDURE IF EXISTS createdatabase;
 
-DELIMITER //
+DELIMITER $$
 
 CREATE PROCEDURE createdatabase()
 BEGIN
 
--- Drop tables in reverse order.
+
+
+/*
+    ------------------------------------------------
+    ------- Drop all tables in reverse order -------
+    ------------------------------------------------
+*/
+
+-- Drop logs
 DROP TABLE IF EXISTS CustomerLog;
 DROP TABLE IF EXISTS BankLog;
+
+-- Drop other tables
 DROP TABLE IF EXISTS UserAccount;
 DROP TABLE IF EXISTS Account;
 DROP TABLE IF EXISTS User;
 DROP TABLE IF EXISTS Bank;
+
+
+
+/*
+    -------------------------------------------------
+    ----------- Start of Create all tables ----------
+    -------------------------------------------------
+*/
 
 CREATE TABLE Bank (
     id INTEGER AUTO_INCREMENT PRIMARY KEY,
     balance INTEGER,
     interest DECIMAL(3,2)
 );
+
 
 CREATE TABLE User (
     userId INT AUTO_INCREMENT PRIMARY KEY,
@@ -38,6 +57,7 @@ CREATE TABLE User (
     phone CHAR(12) UNIQUE
 );
 
+
 CREATE TABLE Account (
     accountId INT AUTO_INCREMENT,
     accountNr NUMERIC(16, 0),
@@ -49,6 +69,7 @@ CREATE TABLE Account (
     PRIMARY KEY (accountId, accountNr)
 );
 
+
 CREATE TABLE UserAccount (
     userId INT NOT NULL,
     accountId INT NOT NULL,
@@ -57,16 +78,17 @@ CREATE TABLE UserAccount (
     FOREIGN KEY (accountId) REFERENCES Account(accountId)
 );
 
+
 CREATE TABLE BankLog (
-    id INTEGER AUTO_INCREMENT PRIMARY KEY,
+    id INTEGER AUTO_INCREMENT,
     dateAdded DATETIME,
     accountNrTo NUMERIC(16, 0) NOT NULL,
     accountNrFrom NUMERIC(16, 0) NOT NULL,
     amountSent NUMERIC(16, 3) NOT NULL,
 
-    FOREIGN KEY (accountNrTo) REFERENCES Account(accountNr),
-    FOREIGN KEY (accountNrFrom) REFERENCES Account(accountNr)
+    PRIMARY KEY (id, accountNrTo, accountNrFrom)
 );
+
 
 CREATE TABLE CustomerLog (
     id INTEGER AUTO_INCREMENT PRIMARY KEY,
@@ -78,26 +100,35 @@ CREATE TABLE CustomerLog (
     FOREIGN KEY (userId) REFERENCES User(userId)
 );
 
--- Create view
+-- End of creating tables...
+
+
+
+/*
+-------------------------------------------------
+---------- Create VUserAndAccount view ----------
+-------------------------------------------------
+*/
+
 DROP VIEW IF EXISTS `VUserAndAccount`;
 CREATE VIEW VUserAndAccount AS
     SELECT User.firstName, User.lastName, Account.balance, User.userId, Account.accountId
     FROM UserAccount
     INNER JOIN User ON User.userId = UserAccount.userId
     INNER JOIN Account ON UserAccount.accountId = Account.accountId;
-
 END
-// -- End of procedure createdatabase
+$$ -- End of creating VUserAndAccount.
 
 
-DELIMITER ;
 
-DROP PROCEDURE IF EXISTS moveMoney;
+/*
+-------------------------------------------------
+---------- Create procedure moveMoney -----------
+-------------------------------------------------
+*/
 
-DELIMITER //
-
+DROP PROCEDURE IF EXISTS moveMoney$$
 CREATE PROCEDURE moveMoney(
-
     userId INTEGER,
     pinCode INTEGER,
     fromAccountNr NUMERIC(16, 0),
@@ -106,13 +137,18 @@ CREATE PROCEDURE moveMoney(
     percentToUs NUMERIC(3, 2)
 )
 BEGIN
-    DECLARE fromAccountBalance NUMERIC(8, 3); -- Note, the number can be 5 in length and have 3 decimals.
+    -- Quick Notes
+    -- NUMERIC and DECIMAL is exactly the same.
+    -- NUMERIC(8, 3) will have a number of length 5 ( 8-3 ) and 3 decimals (eg. 91823.385).
+
+    DECLARE fromAccountBalance NUMERIC(8, 3);
     DECLARE toAccountBalance NUMERIC(8, 3);
 
     START TRANSACTION;
 
     SET toAccountBalance = (SELECT balance FROM Account WHERE accountNr LIKE toAccountNr);
     SET fromAccountBalance = (SELECT balance FROM Account WHERE accountNr LIKE fromAccountNr);
+
 
     -- Check if user has access to account
     IF (SELECT accountId
@@ -123,25 +159,30 @@ BEGIN
         ROLLBACK;
         SELECT "User does not own this account.";
 
+
     -- Check if it's the correct pin code.
     ELSEIF (SELECT pinCode FROM User WHERE User.userId = userId AND User.pinCode = pinCode) IS NULL THEN
         ROLLBACK;
         SELECT "Wrong pin code!";
+
 
     -- Check if from account exists.
     ELSEIF fromAccountBalance IS NULL THEN
         ROLLBACK;
         SELECT "Sending account not found!";
 
+
     -- Check if to account exists.
     ELSEIF toAccountBalance IS NULL THEN
         ROLLBACK;
         SELECT "Recieving account not found!";
 
+
     -- Check if from account has enough money.
     ELSEIF fromAccountBalance - amount < 0 THEN
         ROLLBACK;
         SELECT "Amount on the account is not enough to make the transaction.";
+
 
     -- Transaction with money.
     ELSE
@@ -168,21 +209,21 @@ BEGIN
 
     END IF;
 
-    -- For debug.
-    SELECT fromAccountBalance AS FromAccount, toAccountBalance AS ToAccount, (amount * percentToUs) AS BankRecieved;
+    -- Uncomment for debugging...
+    -- SELECT fromAccountBalance AS FromAccount, toAccountBalance AS ToAccount, (amount * percentToUs) AS BankRecieved;
 
 END
-//
+$$ -- End of procedure moveMoney
 
-DELIMITER ;
+
 
 /*
-* adding the percent statment to move money
+-------------------------------------------------
+---------- Create procedure swishMoney ----------
+-------------------------------------------------
 */
-DROP PROCEDURE IF EXISTS swishMoney;
 
-DELIMITER //
-
+DROP PROCEDURE IF EXISTS swishMoney$$
 CREATE PROCEDURE swishMoney(
     userId INTEGER,
     pinCode INTEGER,
@@ -193,17 +234,16 @@ CREATE PROCEDURE swishMoney(
 BEGIN
     CALL moveMoney(userId, pinCode, fromAccountNr, amount, toAccountNr, 0.05);
 END
-//
-DELIMITER ;
+$$ -- End of procedure swishMoney
 
-DROP PROCEDURE IF EXISTS webMoveMoney;
-
-DELIMITER //
 
 /*
-*  adding the percent statment to move money
+-------------------------------------------------
+--------- Create procedure webMoveMoney ---------
+-------------------------------------------------
 */
 
+DROP PROCEDURE IF EXISTS webMoveMoney;
 CREATE PROCEDURE webMoveMoney(
     userId INTEGER,
     pinCode INTEGER,
@@ -214,19 +254,26 @@ CREATE PROCEDURE webMoveMoney(
 BEGIN
     CALL moveMoney(userId, pinCode, fromAccountNr, amount, toAccountNr, 0.03);
 END
-//
-DELIMITER ;
+$$ -- End of procedure webMoveMoney
 
 
+/*
+-------------------------------------------------
+--------- Procedure to fill the database --------
+-------------------------------------------------
+*/
 
 DROP PROCEDURE IF EXISTS filldatabase;
-
-DELIMITER //
-
 CREATE PROCEDURE filldatabase()
 BEGIN
 
-INSERT INTO Bank (balance, interest) VALUES (0, 1.45);
+
+
+INSERT INTO Bank
+    (balance, interest)
+VALUES (0, 1.45);
+
+
 
 INSERT INTO User
     (pinCode, civicNumber, firstName, lastName, street, zip, city, phone)
@@ -253,6 +300,8 @@ VALUES
     (3411, '8110126318', 'Alec', 'Norberg', 'Morvall Färilavägen 39', 82043, 'TALLÅSEN', '466518916068'),
     (6474, '8402070026', 'Daniela', 'Hansson', 'Morvall Färilavägen 50', 82044, 'TALLÅSEN', '466576424420');
 
+
+
 INSERT INTO Account
     (accountNr, expireMonth, expireYear, accountCVC, balance)
 VALUES
@@ -277,6 +326,8 @@ VALUES
     ('5301348860764131', 8, 2019, 643, 1000),
     ('4556884132140424', 1, 2022, 578, 1000),
     ('4929127317239714', 10, 2022, 127, 1000);
+
+
 
 INSERT INTO UserAccount
     (userId, accountId)
@@ -315,13 +366,23 @@ VALUES
     (13, 10),
     (10, 13);
 
+
+
 END
-// -- End of procedure filldatabase
+$$ -- End of procedure filldatabase
+
+
 
 DELIMITER ;
 
 CALL createdatabase;
 CALL filldatabase;
+
+
+
+-- EXTRAS
+
+
 
 -- CALL moveMoney(15, 1395, 5296459010695203, 500, 4556658461192275);
 
