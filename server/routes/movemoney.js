@@ -5,18 +5,18 @@ const database = require('../dbstartup.js');
 
 router.post("/", (request, resolve) => {
     console.log(request.body);
+    var data = {};
+    data.object = {
+        userid: request.body.userid,
+        usercode: request.body.usercode,
+        code: request.body.code,
+        fromaccountnr: request.body.fromaccountnr,
+        toaccountnr: request.body.toaccountnr,
+        amount: request.body.amount
+    };
     if (request.body.code === "200") {
-        var data = {};
-        data.object = {
-            userid: request.body.userid,
-            usercode: request.body.usercode,
-            code: request.body.code,
-            fromaccountnr: request.body.fromaccountnr,
-            toaccountnr: request.body.toaccountnr,
-            amount: request.body.amount
-        };
         data.sql = `
-        CALL moveMoney(${request.body.userid}, ${request.body.usercode}, ${request.body.fromaccountnr}, ${request.body.amount}, ${request.body.toaccountnr});
+        CALL webMoveMoney(${request.body.userid}, ${request.body.usercode}, ${request.body.fromaccountnr}, ${request.body.amount}, ${request.body.toaccountnr});
         `;
         database.sqlpromise(data.sql)
         .then((result) => {
@@ -24,8 +24,16 @@ router.post("/", (request, resolve) => {
         });
 
     }
-    else if (request.body.code === 300) {
-
+    else {
+        if (request.body.code === "300") {
+            data.sql = `
+            CALL swishMoney(${request.body.userid}, ${request.body.usercode}, ${request.body.fromaccountnr}, ${request.body.amount}, ${request.body.toaccountnr});
+            `;
+            database.sqlpromise(data.sql)
+            .then((result) => {
+                resolve.render("movemoney", data);
+            });
+        }
     }
 });
 module.exports = router;

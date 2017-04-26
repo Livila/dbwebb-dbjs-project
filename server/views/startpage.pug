@@ -4,14 +4,25 @@ body
 if object
     
     p Välkommen till Internetbanken!
-    p= object.name
+    p #{object.firstname} #{object.lastname}
     <div id="startpagetable">
         <table>
             <tr><th>Kontonummer</th><th>Saldo</th></tr>
-            each row, rownum in resultset
+            each row, rownum in accounts
                 tr
-                    td= row.accnr
+                    td= row.accountNr
                     td= row.balance
+        </table>
+        <p>Här nere listas alla personer som har tillgång till de konton du har tillgång till.</p>
+        <table>
+            <tr><th>Kontonummer</th><th>Förnamn</th><th>Efternamn</th><th>Personnummer</th></tr>
+            each row, rownum in resultset
+                if (row.firstName!=Nicolai)
+                tr
+                    td= row.accountNr
+                    td= row.firstName
+                    td= row.lastName
+                    td= row.civicNumber
         </table>
     </div>
     
@@ -20,7 +31,7 @@ if object
         <form method="post" action="/movemoney">
             <input type="hidden" name="userid" value="#{object.userid}">
             <input type="hidden" name="usercode" value="#{object.usercode}">
-            <input type="hidden" name="code" value="#{object.code}">
+            <input type="hidden" name="code" value="200">
             <p>Kontonummer FRÅN: <input type="text" name="fromaccountnr" value=""></p>
             <p>Total Summa: <input type="text" name="amount" value=""></p>
             <p>Kontonummer TILL: <input type="text" name="toaccountnr" value=""></p>
@@ -29,5 +40,5 @@ if object
     </div>
 else
     p Bad login
-
+- console.log(resultset)
 include incl/footer.pug

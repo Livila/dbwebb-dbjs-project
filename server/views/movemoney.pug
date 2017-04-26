@@ -3,11 +3,12 @@ include incl/header.pug
 body
     <div id=movemoneybd>
         p Pengarna är nu flyttade!
-        <form method="post" action="/startpage">
-            <input type="hidden" name="userid" value="#{object.userid}">
-            <input type="hidden" name="usercode" value="#{object.usercode}">
-            <input type="submit" name="MoveMoney" value="Återgå">
-        </form>
+            <form method="post" action="/startpage">
+                <input type="hidden" name="userid" value="#{object.userid}">
+                <input type="hidden" name="usercode" value="#{object.usercode}">
+                <input type="hidden" name="code" value="#{object.code}">
+                <input type="submit" name="MoveMoney" value="Återgå">
+            </form>
     </div>
   
 include incl/footer.pug

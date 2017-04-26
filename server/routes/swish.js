@@ -8,7 +8,6 @@ router.get("/", (request, resolve) => {
         var data = {};
         data.title = `Swish-appen`;
         data.message = `Välkommen till Swish-appen!`;
-        data.code = 300;
         resolve.render("swish", data);
 });
 module.exports = router;

@@ -5,44 +5,69 @@ const router = express.Router();
 const database = require('../dbstartup.js');
 
 router.post("/", (request, resolve) => {
+    if (request.body.code === "300") {
+        resolve.redirect("/index");
+    }
     var data = {};
     data.title = `Startsida`;
     data.message = ``;
     data.sql = `
     SELECT
-    firstName, lastName
+    Account.accountNr,
+    Account.balance,
+    User.firstName,
+    User.lastName
     FROM
-        User
+    UserAccount
+        INNER JOIN
+    User ON User.userId LIKE UserAccount.userId
+		INNER JOIN
+	Account ON Account.accountId LIKE UserAccount.accountId
     WHERE
-        userId LIKE '${request.body.userid}' AND pinCode LIKE '${request.body.usercode}';
+    User.userId LIKE '${request.body.userid}' AND User.pinCode LIKE '${request.body.usercode}';
     `;
     database.sqlpromise(data.sql)
     .then((result) => {
         if (result.length) {
             data.object = {
-                name: result[0].firstName + " " + result[0].lastName,
+                firstname: result[0].firstName,
+                lastname: result[0].lastName,
                 userid: request.body.userid,
-                usercode: request.body.usercode,
-                code: "200"
+                usercode: request.body.usercode
             }
+            data.accounts = result;
         }
     });
     data.sql = `
-    SELECT Account.accountNr AS accnr, Account.balance AS balance
-    FROM UserAccount
-    INNER JOIN User ON User.userId = UserAccount.userId
-    INNER JOIN Account ON UserAccount.accountId = Account.accountId
-    WHERE User.userId LIKE ${request.body.userid};
+    SELECT
+    UserAccount.userId,
+    UserAccount.accountId,
+    Account.accountNr,
+    Account.balance,
+    User.firstName,
+    User.lastName,
+    User.civicNumber
+    FROM
+    UserAccount
+        INNER JOIN
+    User ON User.userId LIKE UserAccount.userId
+		INNER JOIN
+	Account ON Account.accountId LIKE UserAccount.accountId
+    WHERE
+    UserAccount.accountId IN (SELECT
+            UserAccount.accountId
+        FROM
+            UserAccount
+        WHERE
+            UserAccount.userId LIKE '${request.body.userid}')
+    AND UserAccount.userId != '${request.body.userid}'
+    ORDER BY accountId ASC;
     `;
-    /*
-    */
     database.sqlpromise(data.sql)
     .then((result) => {
         if (result.length) {
             data.resultset = result;
         }
-        //console.log(request.body);
-        console.log(data.object);
         resolve.render("startpage", data);
     });
 });

@@ -36,6 +36,7 @@ if ('LINUX_PORT' in process.env) {
 
 const index = require('./routes/index.js');
 app.use("/", index);
+app.use("/index", index);
 const login = require('./routes/login.js');
 app.use("/login", login);
 const startpage = require('./routes/startpage.js');
