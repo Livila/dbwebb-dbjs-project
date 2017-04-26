@@ -7,30 +7,48 @@ SET NAMES 'utf8';
 
 DROP PROCEDURE IF EXISTS createdatabase;
 
-DELIMITER //
+DELIMITER $$
 
-CREATE PROCEDURE createdatabase(
-)
+CREATE PROCEDURE createdatabase()
 BEGIN
--- Drop tables in reverse order.
+
+
+
+/*
+    ------------------------------------------------
+    ------- Drop all tables in reverse order -------
+    ------------------------------------------------
+*/
+
+-- Drop logs
 DROP TABLE IF EXISTS CustomerLog;
 DROP TABLE IF EXISTS BankLog;
+
+-- Drop other tables
 DROP TABLE IF EXISTS UserAccount;
 DROP TABLE IF EXISTS Account;
 DROP TABLE IF EXISTS User;
 DROP TABLE IF EXISTS Bank;
 
+
+
+/*
+    -------------------------------------------------
+    ----------- Start of Create all tables ----------
+    -------------------------------------------------
+*/
+
 CREATE TABLE Bank (
-    id INTEGER AUTO_INCREMENT PRIMARY KEY NOT NULL,
+    id INTEGER AUTO_INCREMENT PRIMARY KEY,
     balance INTEGER,
     interest DECIMAL(3,2)
 );
 
+
 CREATE TABLE User (
-    userId INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
+    userId INT AUTO_INCREMENT PRIMARY KEY,
     pinCode INT(4) UNSIGNED ZEROFILL NOT NULL,
--- Format: YYMMDDXXXX
-    civicNumber CHAR(10) UNIQUE NOT NULL,
+    civicNumber CHAR(10) UNIQUE NOT NULL, -- Format: YYMMDDXXXX
     firstName CHAR(20) NOT NULL,
     lastName CHAR(20) NOT NULL,
     street CHAR(30) NOT NULL,
@@ -39,98 +57,152 @@ CREATE TABLE User (
     phone CHAR(12) UNIQUE
 );
 
+
 CREATE TABLE Account (
-    accountId INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
-    accountNr CHAR(16) NOT NULL,
+    accountId INT AUTO_INCREMENT,
+    accountNr NUMERIC(16, 0),
     expireMonth INT(2),
     expireYear INT(4),
     accountCVC INT(3) UNSIGNED ZEROFILL,
-    balance INT
+    balance INT,
+
+    PRIMARY KEY (accountId, accountNr)
 );
+
 
 CREATE TABLE UserAccount (
     userId INT NOT NULL,
     accountId INT NOT NULL,
+
     FOREIGN KEY (userId) REFERENCES User(userId),
     FOREIGN KEY (accountId) REFERENCES Account(accountId)
 );
 
--- Create view
+
+CREATE TABLE BankLog (
+    id INTEGER AUTO_INCREMENT,
+    dateAdded DATETIME,
+    accountNrTo NUMERIC(16, 0) NOT NULL,
+    accountNrFrom NUMERIC(16, 0) NOT NULL,
+    amountSent NUMERIC(16, 3) NOT NULL,
+
+    PRIMARY KEY (id, accountNrTo, accountNrFrom)
+);
+
+
+CREATE TABLE CustomerLog (
+    id INTEGER AUTO_INCREMENT PRIMARY KEY,
+    userId INTEGER NOT NULL,
+    bankLogId INTEGER NOT NULL,
+    info CHAR(20),
+
+    FOREIGN KEY (bankLogId) REFERENCES BankLog(id),
+    FOREIGN KEY (userId) REFERENCES User(userId)
+);
+
+-- End of creating tables...
+
+
+
+/*
+-------------------------------------------------
+---------- Create VUserAndAccount view ----------
+-------------------------------------------------
+*/
+
 DROP VIEW IF EXISTS `VUserAndAccount`;
 CREATE VIEW VUserAndAccount AS
     SELECT User.firstName, User.lastName, Account.balance, User.userId, Account.accountId
     FROM UserAccount
     INNER JOIN User ON User.userId = UserAccount.userId
     INNER JOIN Account ON UserAccount.accountId = Account.accountId;
+-- End of creating VUserAndAccount.
 
 END
-// -- End of procedure createdatabase
+$$ -- End of procedure createdatabase
 
-DELIMITER ;
 
-DROP PROCEDURE IF EXISTS moveMoney;
 
-DELIMITER //
+/*
+-------------------------------------------------
+---------- Create procedure moveMoney -----------
+-------------------------------------------------
+*/
 
+DROP PROCEDURE IF EXISTS moveMoney$$
 CREATE PROCEDURE moveMoney(
-
     userId INTEGER,
-    usercode INTEGER,
-    fromaccountnr NUMERIC(16, 0),
+    pinCode INTEGER,
+    fromAccountNr NUMERIC(16, 0),
     amount INTEGER,
-    toaccountnr NUMERIC(16, 0),
+    toAccountNr NUMERIC(16, 0),
     percentToUs NUMERIC(3, 2)
 )
 BEGIN
-    DECLARE fromAccountBalance NUMERIC(7, 2); -- Note, number can be 5 in length and 2 decimals.
-    DECLARE toAccountBalance NUMERIC(7, 2);
+    -- Quick Notes
+    -- NUMERIC and DECIMAL is exactly the same.
+    -- NUMERIC(8, 3) will have a number of length 5 ( 8-3 ) and 3 decimals (eg. 91823.385).
+
+    DECLARE fromAccountBalance NUMERIC(8, 3);
+    DECLARE toAccountBalance NUMERIC(8, 3);
 
     START TRANSACTION;
 
+    SET toAccountBalance = (SELECT balance FROM Account WHERE accountNr LIKE toAccountNr);
+    SET fromAccountBalance = (SELECT balance FROM Account WHERE accountNr LIKE fromAccountNr);
+
+
     -- Check if user has access to account
-    IF (
-        (SELECT COUNT(accountId)
-            FROM UserAccount
-            WHERE UserAccount.userId = userId
-            AND (
-                SELECT accountId FROM Account WHERE Account.accountNr = fromaccountnr
-            )) = 0
-        ) THEN
+    IF (SELECT accountId
+        FROM UserAccount
+        WHERE UserAccount.userId = userId
+            AND (SELECT accountId FROM Account WHERE Account.accountNr = fromAccountNr)
+    ) IS NULL THEN
         ROLLBACK;
-    END IF;
+        SELECT "User does not own this account.";
 
-    -- Is correct pin code.
-    IF (SELECT pinCode FROM User WHERE User.userId = userId AND User.pinCode != usercode) THEN
+
+    -- Check if it's the correct pin code.
+    ELSEIF (SELECT pinCode FROM User WHERE User.userId = userId AND User.pinCode = pinCode) IS NULL THEN
         ROLLBACK;
-    END IF;
+        SELECT "Wrong pin code!";
 
 
-    SET toAccountBalance = (SELECT balance FROM Account WHERE accountNr LIKE toaccountnr);
-    SET fromAccountBalance = (SELECT balance FROM Account WHERE accountNr LIKE fromaccountnr);
-
-    IF fromAccountBalance is NULL THEN
+    -- Check if from account exists.
+    ELSEIF fromAccountBalance IS NULL THEN
         ROLLBACK;
         SELECT "Sending account not found!";
-    ELSEIF toAccountBalance is NULL THEN
+
+
+    -- Check if to account exists.
+    ELSEIF toAccountBalance IS NULL THEN
         ROLLBACK;
         SELECT "Recieving account not found!";
+
+
+    -- Check if from account has enough money.
     ELSEIF fromAccountBalance - amount < 0 THEN
         ROLLBACK;
         SELECT "Amount on the account is not enough to make the transaction.";
-    ELSE
 
+
+    -- Transaction with money.
+    ELSE
+        -- Update recieving account balance.
         UPDATE Account
         SET
             balance = balance + (amount * (1 - percentToUs))
         WHERE
-            accountNr = toaccountnr;
+            accountNr = toAccountNr;
 
+        -- Update sending account balance.
         UPDATE Account
         SET
             balance = balance - amount
         WHERE
-            accountNr = fromaccountnr;
+            accountNr = fromAccountNr;
 
+        -- Update bank balance.
         UPDATE Bank
         SET
             balance = balance + (amount * percentToUs)
@@ -139,66 +211,71 @@ BEGIN
 
     END IF;
 
-    SELECT fromAccountBalance AS FromAccount, toAccountBalance AS ToAccount, (amount * percentToUs) AS BankRecieved;
+    -- Uncomment for debugging...
+    -- SELECT fromAccountBalance AS FromAccount, toAccountBalance AS ToAccount, (amount * percentToUs) AS BankRecieved;
 
 END
-//
+$$ -- End of procedure moveMoney
 
-DELIMITER ;
+
 
 /*
-* adding the percent statment to move money
-*/
-DROP PROCEDURE IF EXISTS swishMoney;
-
-DELIMITER //
-
-CREATE PROCEDURE swishMoney(
-    userId INTEGER,
-    usercode INTEGER,
-    fromaccountnr NUMERIC(16,0),
-    amount INTEGER,
-    toaccountnr NUMERIC(16,0)
-    )
-    BEGIN
-    CALL moveMoney(userId, usercode, fromaccountnr, amount, toaccountnr, 0.05);
-    END
-//
-DELIMITER ;
-
-DROP PROCEDURE IF EXISTS webMoveMoney;
-
-DELIMITER //
-
-/*
-*  adding the percent statment to move money
+-------------------------------------------------
+---------- Create procedure moveMoneySwish ----------
+-------------------------------------------------
 */
 
-CREATE PROCEDURE webMoveMoney(
+DROP PROCEDURE IF EXISTS moveMoneySwish$$
+CREATE PROCEDURE moveMoneySwish(
     userId INTEGER,
-    usercode INTEGER,
-    fromaccountnr NUMERIC(16,0),
+    pinCode INTEGER,
+    fromAccountNr NUMERIC(16,0),
     amount INTEGER,
-    toaccountnr NUMERIC(16,0)
-    )
-    BEGIN
-    CALL moveMoney(userId, usercode, fromaccountnr, amount, toaccountnr, 0.03);
-    END
-//
-DELIMITER ;
-
-
-
-
-DROP PROCEDURE IF EXISTS filldatabase;
-
-DELIMITER //
-
-CREATE PROCEDURE filldatabase(
+    toAccountNr NUMERIC(16,0)
 )
 BEGIN
+    CALL moveMoney(userId, pinCode, fromAccountNr, amount, toAccountNr, 0.05);
+END
+$$ -- End of procedure moveMoneySwish
 
-INSERT INTO Bank (balance, interest) VALUES (0, 1.45);
+
+/*
+-------------------------------------------------
+--------- Create procedure moveMoneyWeb ---------
+-------------------------------------------------
+*/
+
+DROP PROCEDURE IF EXISTS moveMoneyWeb$$
+CREATE PROCEDURE moveMoneyWeb(
+    userId INTEGER,
+    pinCode INTEGER,
+    fromAccountNr NUMERIC(16,0),
+    amount INTEGER,
+    toAccountNr NUMERIC(16,0)
+)
+BEGIN
+    CALL moveMoney(userId, pinCode, fromAccountNr, amount, toAccountNr, 0.03);
+END
+$$ -- End of procedure moveMoneyWeb
+
+
+/*
+-------------------------------------------------
+--------- Procedure to fill the database --------
+-------------------------------------------------
+*/
+
+DROP PROCEDURE IF EXISTS filldatabase;
+CREATE PROCEDURE filldatabase()
+BEGIN
+
+
+
+INSERT INTO Bank
+    (balance, interest)
+VALUES (0, 1.45);
+
+
 
 INSERT INTO User
     (pinCode, civicNumber, firstName, lastName, street, zip, city, phone)
@@ -225,6 +302,8 @@ VALUES
     (3411, '8110126318', 'Alec', 'Norberg', 'Morvall Färilavägen 39', 82043, 'TALLÅSEN', '466518916068'),
     (6474, '8402070026', 'Daniela', 'Hansson', 'Morvall Färilavägen 50', 82044, 'TALLÅSEN', '466576424420');
 
+
+
 INSERT INTO Account
     (accountNr, expireMonth, expireYear, accountCVC, balance)
 VALUES
@@ -249,6 +328,8 @@ VALUES
     ('5301348860764131', 8, 2019, 643, 1000),
     ('4556884132140424', 1, 2022, 578, 1000),
     ('4929127317239714', 10, 2022, 127, 1000);
+
+
 
 INSERT INTO UserAccount
     (userId, accountId)
@@ -287,52 +368,18 @@ VALUES
     (13, 10),
     (10, 13);
 
+
+
 END
-// -- End of procedure filldatabase
+$$ -- End of procedure filldatabase
+
+
 
 DELIMITER ;
 
 CALL createdatabase;
 CALL filldatabase;
-/*
-SELECT User.firstName, User.lastName, User.civicNumber FROM User;
-SELECT UserAccount.userId, UserAccount.accountId, User.firstName, User.lastName, User.civicNumber FROM UserAccount INNER JOIN User ON User.userId LIKE UserAccount.userId WHERE UserAccount.accountId IN(SELECT UserAccount.accountId FROM UserAccount WHERE UserAccount.userId LIKE 15);
-SELECT
-    UserAccount.userId,
-    UserAccount.accountId,
-    Account.accountNr,
-    Account.balance,
-    User.firstName,
-    User.lastName,
-    User.civicNumber
-FROM
-    UserAccount
-        INNER JOIN
-    User ON User.userId LIKE UserAccount.userId
-		INNER JOIN
-	Account ON Account.accountId LIKE UserAccount.accountId
-WHERE
-    UserAccount.accountId IN (SELECT
-            UserAccount.accountId
-        FROM
-            UserAccount
-        WHERE
-            UserAccount.userId LIKE 15)
-AND UserAccount.userId != 15
-ORDER BY accountId ASC;
 
 
-SELECT
-    Account.accountNr,
-    Account.balance,
-    User.firstName,
-    User.lastName
-FROM
-    UserAccount
-        INNER JOIN
-    User ON User.userId LIKE UserAccount.userId
-		INNER JOIN
-	Account ON Account.accountId LIKE UserAccount.accountId
-WHERE
-    User.userId LIKE 15 AND User.pinCode LIKE 1395;
-*/ 
+
+-- EXTRAS
