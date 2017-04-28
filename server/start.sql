@@ -42,7 +42,7 @@ DROP TABLE IF EXISTS Bank;
 CREATE TABLE Bank (
     id INTEGER AUTO_INCREMENT PRIMARY KEY,
     balance INTEGER,
-    interest DECIMAL(3,2)
+    interestRate DECIMAL(3,2)
 );
 
 
@@ -77,34 +77,25 @@ CREATE TABLE UserAccount (
 );
 
 
-CREATE TABLE BankLog (
-    id INTEGER AUTO_INCREMENT,
-    dateAdded DATETIME,
+CREATE TABLE CustomerLog (
+    id INTEGER AUTO_INCREMENT PRIMARY KEY,
+    transferDate DATETIME NOT NULL,
+    userId INTEGER NOT NULL,
     accountNrTo NUMERIC(16, 0) NOT NULL,
     accountNrFrom NUMERIC(16, 0) NOT NULL,
     amountSent NUMERIC(16, 3) NOT NULL,
+    transferType CHAR(10),
 
-    PRIMARY KEY (id, accountNrTo, accountNrFrom)
-);
-
-
-CREATE TABLE CustomerLog (
-    id INTEGER AUTO_INCREMENT PRIMARY KEY,
-    userId INTEGER NOT NULL,
-    bankLogId INTEGER NOT NULL,
-    info CHAR(20),
-
-    FOREIGN KEY (bankLogId) REFERENCES BankLog(id),
     FOREIGN KEY (userId) REFERENCES User(userId)
 );
 
 
 CREATE TABLE interestLog (
     dateAddedToLog DATETIME NOT NULL,
-    accountNr INTEGER NOT NULL,
-    interestSum NUMERIC(16, 3),
+    accountNr NUMERIC(16, 0) NOT NULL,
+    interestSum NUMERIC(16, 3) NOT NULL
 
-    FOREIGN KEY (accountNr) REFERENCES Account(accountNr)
+    -- FOREIGN KEY (accountNr) REFERENCES Account(accountNr)
 );
 
 -- End of creating tables...
@@ -216,18 +207,13 @@ BEGIN
         WHERE id LIKE 1;
 
 
-        -- Add log values.
-        INSERT INTO BankLog (dateAdded, accountNrTo, accountNrFrom, amountSent) VALUES (
-            NOW(), toAccountNr, fromAccountNr, amount
-        );
-
-        IF percentToUs = 0.3 THEN
-            INSERT INTO CustomerLog (userId, bankLogId, info) VALUES (
-                userId, (SELECT MAX(id) FROM BankLog), "Webservice"
+        IF percentToUs = 0.03 THEN
+            INSERT INTO CustomerLog (transferDate, userId, accountNrTo, accountNrFrom, amountSent, transferType) VALUES (
+                NOW(), userId, toAccountNr, fromAccountNr, amount, "Webservice"
             );
         ELSE
-            INSERT INTO CustomerLog (userId, bankLogId, info) VALUES (
-                userId, (SELECT MAX(id) FROM BankLog), "Swish"
+            INSERT INTO CustomerLog (userId, userId, accountNrTo, accountNrFrom, amountSent, transferType) VALUES (
+                NOW(), userId, toAccountNr, fromAccountNr, amount, "Swish"
             );
         END IF;
 
@@ -285,6 +271,62 @@ $$ -- End of procedure moveMoneyWeb
 
 /*
 -------------------------------------------------
+---------- Create procedure calculateInterest ----------
+-------------------------------------------------
+*/
+DROP PROCEDURE IF EXISTS calculateInterest$$
+CREATE PROCEDURE calculateInterest(
+    accountNr INTEGER,
+    interestSum NUMERIC(16, 3)
+)
+BEGIN
+    INSERT INTO interestLog (dateOfCalculation, accountNr, interestSum)
+        VALUES (NOW(), accountNr, ((SELECT interestRate FROM Bank WHERE id=1) * balance / 365));
+END
+$$
+
+/*
+DROP PROCEDURE IF EXISTS calculateInterest$$
+CREATE PROCEDURE calculateInterest(
+)
+BEGIN
+    DECLARE currentDate CHAR(10);
+    DECLARE counter INT;
+    DECLARE max INT;
+
+    SET max = (SELECT MAX(id) FROM interestLog);
+    SET counter = 1;
+    SET currentDate = CURDATE();
+    
+    ALTER TABLE interestLog
+    ADD currentDate INT;
+
+    forEveryAccount: LOOP
+    IF counter > max THEN
+    LEAVE forEveryAccount;
+    END IF;
+
+    SET counter = counter + 1;
+
+
+    UPDATE interestLog
+        SET
+            currentDate = (SELECT balance FROM Account WHERE id = counter) * (SELECT interest FROM Bank WHERE id = 1)
+        WHERE
+            id = counter;
+    
+    ITERATE forEveryAccount;
+    END LOOP;
+
+            
+
+END
+$$ -- End of procedure calculateInterest
+
+
+
+/*
+-------------------------------------------------
 --------- Procedure to fill the database --------
 -------------------------------------------------
 */
@@ -296,7 +338,7 @@ BEGIN
 
 
 INSERT INTO Bank
-    (balance, interest)
+    (balance, interestRate)
 VALUES (0, 1.45);
 
 
