@@ -138,7 +138,7 @@ CREATE PROCEDURE moveMoney(
 BEGIN
     -- Quick Notes
     -- NUMERIC and DECIMAL is exactly the same.
-    -- NUMERIC(8, 3) will have a number of length 5 ( 8-3 ) and 3 decimals (eg. 91823.385).
+    -- NUMERIC(8, 3) will have a numb10, 2022, 127, 1000);er of length 5 ( 8-3 ) and 3 decimals (eg. 91823.385).
 
     DECLARE fromAccountBalance NUMERIC(8, 3);
     DECLARE toAccountBalance NUMERIC(8, 3);
@@ -204,6 +204,23 @@ BEGIN
         SET
             balance = balance + (amount * percentToUs)
         WHERE id LIKE 1;
+
+
+        -- Add log values.
+        INSERT INTO BankLog (dateAdded, accountNrTo, accountnNrFrom, amountSent) VALUES (
+            NOW(), toAccountNr, fromAccountNr, amount
+        );
+
+        IF percentToUs = 0.3 THEN
+            INSERT INTO CustomerLog (userId, bankLogId, info) VALUES (
+                userId, (SELECT MAX(id) FROM BankLog), "Transferred money using the webservice."
+            );
+        ELSE
+            INSERT INTO CustomerLog (userId, bankLogId, info) VALUES (
+                userId, (SELECT MAX(id) FROM BankLog), "Transferred money using Swish."
+            );
+        END IF;
+
         COMMIT;
 
     END IF;
