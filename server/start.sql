@@ -21,6 +21,7 @@ BEGIN
 */
 
 -- Drop logs
+DROP TABLE IF EXISTS interestLog;
 DROP TABLE IF EXISTS CustomerLog;
 DROP TABLE IF EXISTS BankLog;
 
@@ -95,6 +96,15 @@ CREATE TABLE CustomerLog (
 
     FOREIGN KEY (bankLogId) REFERENCES BankLog(id),
     FOREIGN KEY (userId) REFERENCES User(userId)
+);
+
+
+CREATE TABLE interestLog (
+    dateAddedToLog DATETIME NOT NULL,
+    accountNr INTEGER NOT NULL,
+    interestSum NUMERIC(16, 3),
+
+    FOREIGN KEY (accountNr) REFERENCES Account(accountNr)
 );
 
 -- End of creating tables...
@@ -207,17 +217,17 @@ BEGIN
 
 
         -- Add log values.
-        INSERT INTO BankLog (dateAdded, accountNrTo, accountnNrFrom, amountSent) VALUES (
+        INSERT INTO BankLog (dateAdded, accountNrTo, accountNrFrom, amountSent) VALUES (
             NOW(), toAccountNr, fromAccountNr, amount
         );
 
         IF percentToUs = 0.3 THEN
             INSERT INTO CustomerLog (userId, bankLogId, info) VALUES (
-                userId, (SELECT MAX(id) FROM BankLog), "Transferred money using the webservice."
+                userId, (SELECT MAX(id) FROM BankLog), "Webservice"
             );
         ELSE
             INSERT INTO CustomerLog (userId, bankLogId, info) VALUES (
-                userId, (SELECT MAX(id) FROM BankLog), "Transferred money using Swish."
+                userId, (SELECT MAX(id) FROM BankLog), "Swish"
             );
         END IF;
 
@@ -343,7 +353,30 @@ VALUES
     ('4556884132140424', 1000),
     ('4929127317239714', 1000);
 
-
+INSERT INTO interestLog
+	(accountNr)
+VALUES
+	('5285415127177850'),
+    ('5379026026843638'),
+    ('4556888485452823'),
+    ('4485008559351951'),
+    ('4929160689171173'),
+    ('4485833035399658'),
+    ('4532500237478092'),
+    ('5321570040216486'),
+    ('5521863023006539'),
+    ('4556658461192275'),
+    ('4556526957179207'),
+    ('4916354791700657'),
+    ('4539430653774191'),
+    ('4916417118182022'),
+    ('5296459010695203'),
+    ('4532870059135702'),
+    ('4916678674933740'),
+    ('5217858613379816'),
+    ('5301348860764131'),
+    ('4556884132140424'),
+    ('4929127317239714');
 
 INSERT INTO UserAccount
     (userId, accountId)
