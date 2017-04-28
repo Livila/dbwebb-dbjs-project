@@ -146,7 +146,7 @@ CREATE PROCEDURE moveMoney(
 BEGIN
     -- Quick Notes
     -- NUMERIC and DECIMAL is exactly the same.
-    -- NUMERIC(8, 3) will have a numb10, 2022, 127, 1000);er of length 5 ( 8-3 ) and 3 decimals (eg. 91823.385).
+    -- NUMERIC(8, 3) will have a number of length 5 ( 8-3 ) and 3 decimals (eg. 91823.385).
 
     DECLARE fromAccountBalance NUMERIC(8, 3);
     DECLARE toAccountBalance NUMERIC(8, 3);
@@ -215,7 +215,7 @@ BEGIN
 
 
         -- Add log values.
-        INSERT INTO BankLog (dateAdded, accountNrTo, accountnNrFrom, amountSent) VALUES (
+        INSERT INTO BankLog (dateAdded, accountNrTo, accountNrFrom, amountSent) VALUES (
             NOW(), toAccountNr, fromAccountNr, amount
         );
 
