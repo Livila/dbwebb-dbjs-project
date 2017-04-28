@@ -21,6 +21,7 @@ BEGIN
 */
 
 -- Drop logs
+DROP TABLE IF EXISTS interestLog;
 DROP TABLE IF EXISTS CustomerLog;
 DROP TABLE IF EXISTS BankLog;
 
@@ -95,6 +96,13 @@ CREATE TABLE CustomerLog (
 
     FOREIGN KEY (bankLogId) REFERENCES BankLog(id),
     FOREIGN KEY (userId) REFERENCES User(userId)
+);
+
+
+CREATE TABLE interestLog (
+	accountNr INTEGER NOT NULL,
+    
+    FOREIGN KEY (accountNr) REFERENCES Account(accountNr)
 );
 
 -- End of creating tables...
@@ -343,7 +351,30 @@ VALUES
     ('4556884132140424', 1000),
     ('4929127317239714', 1000);
 
-
+INSERT INTO interestLog
+	(accountNr)
+VALUES
+	('5285415127177850'),
+    ('5379026026843638'),
+    ('4556888485452823'),
+    ('4485008559351951'),
+    ('4929160689171173'),
+    ('4485833035399658'),
+    ('4532500237478092'),
+    ('5321570040216486'),
+    ('5521863023006539'),
+    ('4556658461192275'),
+    ('4556526957179207'),
+    ('4916354791700657'),
+    ('4539430653774191'),
+    ('4916417118182022'),
+    ('5296459010695203'),
+    ('4532870059135702'),
+    ('4916678674933740'),
+    ('5217858613379816'),
+    ('5301348860764131'),
+    ('4556884132140424'),
+    ('4929127317239714');
 
 INSERT INTO UserAccount
     (userId, accountId)
