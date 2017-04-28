@@ -2,7 +2,6 @@ include incl/header.pug
 
 body
 if object
-    
     p Välkommen till Internetbanken!
     p #{object.firstname} #{object.lastname}
     <div id="startpagetable">
@@ -14,16 +13,17 @@ if object
                     td= row.balance
         </table>
         <p>Här nere listas alla personer som har tillgång till de konton du har tillgång till.</p>
+    if resultset
         <table>
             <tr><th>Kontonummer</th><th>Förnamn</th><th>Efternamn</th><th>Personnummer</th></tr>
             each row, rownum in resultset
-                if (row.firstName!=Nicolai)
                 tr
                     td= row.accountNr
                     td= row.firstName
                     td= row.lastName
                     td= row.civicNumber
         </table>
+    else
     </div>
     
     p Här har du möjligheten att föra över pengar mellan dina konton!
