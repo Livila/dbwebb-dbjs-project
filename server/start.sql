@@ -107,7 +107,6 @@ CREATE TABLE interestLog (
 ---------- Create VUserAndAccount view ----------
 -------------------------------------------------
 */
-
 DROP VIEW IF EXISTS `VUserAndAccount`;
 CREATE VIEW VUserAndAccount AS
     SELECT User.firstName, User.lastName, Account.balance, User.userId, Account.accountId
@@ -119,10 +118,52 @@ CREATE VIEW VUserAndAccount AS
 END
 $$ -- End of procedure createdatabase
 
+
 /*
 -------------------------------------------------
 ------- Create procedure createNewAccount -------
 -------------------------------------------------
+*/
+
+DROP PROCEDURE IF EXISTS createNewAccount$$
+CREATE PROCEDURE createNewAccount(
+    accountNr NUMERIC(16, 0),
+    startBalance INTEGER,
+    accountHolderId INTEGER
+)
+BEGIN
+
+    DECLARE accountExists INTEGER;
+
+    START TRANSACTION;
+
+    SET accountExists = (SELECT balance FROM Account WHERE Account.accountNr LIKE accountNr);
+
+    IF accountExists IS NOT NULL THEN
+        ROLLBACK;
+        SELECT "Account already exists!";
+    ELSE
+
+    INSERT INTO Account (accountNr, balance) VALUES
+        (accountNr, startBalance);
+
+    INSERT INTO UserAccount (userId, accountId) VALUES
+        (accountHolderId, (SELECT MAX(accountId) FROM Account));
+
+    SELECT "The new account has been added.";
+
+    END IF;
+
+    COMMIT;
+END
+$$
+
+
+
+/*
+-----------------------------------------------------
+-- Create procedure createNewAccountToLoggedInUser --
+-----------------------------------------------------
 */
 DROP PROCEDURE IF EXISTS createNewAccountToLoggedInUser$$
 CREATE PROCEDURE createNewAccountToLoggedInUser(
@@ -139,25 +180,30 @@ BEGIN
     SET newAccountNr = (SELECT MAX(accountNr) FROM Account) + 111;
     SET newAccountId = (SELECT MAX(accountId) FROM UserAccount) + 1;
     
-    
+
         -- Check if it's the correct pin code.
     IF (SELECT pinCode FROM User WHERE User.userId = userId AND User.pinCode = pinCode) IS NULL THEN
         ROLLBACK;
         SELECT "Wrong pin code!";
-    END IF;
-    
+    ELSE
+
     INSERT INTO Account
     (accountNr, balance)
 	VALUES
     (newAccountNr, 0);
-    
+
     INSERT INTO UserAccount
     (userId, accountId)
 	VALUES
     (userId, newAccountId);
-    
+
+    END IF;
+
     COMMIT;
 END$$
+
+
+
 /*
 -------------------------------------------------
 ---------- Create procedure moveMoney -----------

@@ -228,6 +228,27 @@ sql.addUser = (ri) => {
     });
 }
 
+sql.addAccount = (ri) => {
+    return new Promise((resolve, reject) => {
+        var accountNr, startBalance, accountHolderId;
+
+        ask(ri, "Enter Account Nr [16]: ").then((answer) => {
+            accountNr = answer;
+        }).then(() => {
+        ask(ri, "Enter Start Balance [16]: ").then((answer) => {
+            startBalance = answer;
+        }).then(() => {
+        ask(ri, "Enter user id the account belongs to: ").then((answer) => {
+            accountHolderId = answer;
+        }).then(() => {
+            sqlPromise(`CALL createNewAccount(${accountNr}, ${startBalance}, ${accountHolderId});`)
+                .catch((err) => {
+                    console.log("Something went wrong... " + err);
+                });
+        })})})
+    });
+}
+
 
 /**
  * Export module
