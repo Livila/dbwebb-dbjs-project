@@ -144,17 +144,16 @@ BEGIN
         SELECT "Account already exists!";
     ELSE
 
-    INSERT INTO Account (accountNr, balance) VALUES
-        (accountNr, startBalance);
+        INSERT INTO Account (accountNr, balance) VALUES
+            (accountNr, startBalance);
 
-    INSERT INTO UserAccount (userId, accountId) VALUES
-        (accountHolderId, (SELECT MAX(accountId) FROM Account));
+        INSERT INTO UserAccount (userId, accountId) VALUES
+            (accountHolderId, (SELECT MAX(accountId) FROM Account));
 
-    SELECT "The new account has been added.";
-
-    END IF;
+        SELECT "The new account has been added.";
 
     COMMIT;
+    END IF;
 END
 $$
 
@@ -179,7 +178,7 @@ BEGIN
 
     SET newAccountNr = (SELECT MAX(accountNr) FROM Account) + 111;
     SET newAccountId = (SELECT MAX(accountId) FROM UserAccount) + 1;
-    
+
 
         -- Check if it's the correct pin code.
     IF (SELECT pinCode FROM User WHERE User.userId = userId AND User.pinCode = pinCode) IS NULL THEN
@@ -187,19 +186,18 @@ BEGIN
         SELECT "Wrong pin code!";
     ELSE
 
-    INSERT INTO Account
-    (accountNr, balance)
-	VALUES
-    (newAccountNr, 0);
+        INSERT INTO Account
+        (accountNr, balance)
+        VALUES
+        (newAccountNr, 0);
 
-    INSERT INTO UserAccount
-    (userId, accountId)
-	VALUES
-    (userId, newAccountId);
-
-    END IF;
+        INSERT INTO UserAccount
+        (userId, accountId)
+        VALUES
+        (userId, newAccountId);
 
     COMMIT;
+    END IF;
 END$$
 
 
