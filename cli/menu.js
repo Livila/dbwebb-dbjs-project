@@ -11,7 +11,7 @@ const readlineInterface = readline.createInterface({
 const sql = require('./sql');
 
 const helpText = `Available commands:
-  exit, help, version, resetdatabase, filldatabase, users`;
+  exit, help, version, resetdatabase, filldatabase, users, adduser`;
 
 var mainLoop = (databaseConnOpt, version) => {
     readlineInterface.setPrompt('Internetbanken$ ');
@@ -89,6 +89,16 @@ readlineInterface.on('line', (line) => {
         case "users":
             sql.showUsers()
             .then((/*value*/) => {
+                readlineInterface.prompt();
+            })
+            .catch((err) => {
+                throw err;
+            });
+        break;
+
+        case "adduser":
+            sql.addUser(readlineInterface)
+            .then(() => {
                 readlineInterface.prompt();
             })
             .catch((err) => {

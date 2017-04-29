@@ -64,6 +64,26 @@ function queryPromise(sql, prettyPrint) {
     });
 }
 
+function sqlPromise(sql) {
+    return new Promise((resolve, reject) => {
+        connection.query(sql, (err, res) => {
+            if (err) {
+                reject(err);
+            }
+
+            resolve();
+        });
+    });
+}
+
+function ask(readlineInterface, question) {
+    return new Promise((resolve, reject) => {
+        readlineInterface.question(question, function(answer) {
+            resolve(answer);
+        });
+    })
+}
+
 sql.resetDatabase = () => {
     var sql = [
         'CALL createdatabase;'
@@ -168,6 +188,44 @@ sql.moveMoney = (userId, usercode, from_accountnr, amount, to_accountnr) => {
     });
 */
     return queryPromise(sql, prettyPrint);
+}
+
+sql.addUser = (ri) => {
+    return new Promise((resolve, reject) => {
+        var pinCode, civicNumber, firstName, lastName, street, zip, city, phone;
+
+        ask(ri, "Enter Pin Code [4]: ").then((answer) => {
+            pinCode = answer;
+        }).then(() => {
+        ask(ri, "Enter Civic Number [10]: ").then((answer) => {
+            civicNumber = answer;
+        }).then(() => {
+        ask(ri, "Enter First Name [20]: ").then((answer) => {
+            firstName = answer;
+        }).then(() => {
+        ask(ri, "Enter Last Name [20]: ").then((answer) => {
+            lastName = answer;
+        }).then(() => {
+        ask(ri, "Enter Street [20]: ").then((answer) => {
+            street = answer;
+        }).then(() => {
+        ask(ri, "Enter Zip [5]: ").then((answer) => {
+            zip = answer;
+        }).then(() => {
+        ask(ri, "Enter City [20]: ").then((answer) => {
+            city = answer;
+        }).then(() => {
+        ask(ri, "Enter Phone [12]: ").then((answer) => {
+            phone = answer;
+        }).then(() => {
+            sqlPromise(`INSERT INTO User (pinCode, civicNumber, firstName, lastName, street, zip, city, phone)
+                VALUES (${pinCode}, ${civicNumber}, '${firstName}', '${lastName}', '${street}', ${zip}, '${city}', ${phone});`)
+            .catch((err) => {
+                console.log("Something went wrong... " + err);
+            });
+            console.log("The new user has been added.");
+        })})})})})})})})
+    });
 }
 
 

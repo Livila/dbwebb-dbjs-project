@@ -52,10 +52,10 @@ CREATE TABLE User (
     civicNumber CHAR(10) UNIQUE NOT NULL, -- Format: YYMMDDXXXX
     firstName CHAR(20) NOT NULL,
     lastName CHAR(20) NOT NULL,
-    street CHAR(30) NOT NULL,
+    street CHAR(20) NOT NULL,
     zip INT(5) UNSIGNED ZEROFILL NOT NULL,
     city CHAR(20) NOT NULL,
-    phone CHAR(12) UNIQUE
+    phone CHAR(12) NOT NULL
 );
 
 
