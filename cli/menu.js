@@ -11,7 +11,13 @@ const readlineInterface = readline.createInterface({
 const sql = require('./sql');
 
 const helpText = `Available commands:
-  exit, help, version, resetdatabase, filldatabase, users, adduser, addaccount`;
+  exit, help, version
+  resetdatabase, filldatabase
+  users                            - Show users
+  adduser                          - Add a new user
+  addaccount                       - Add a new bank account
+  connectusertoaccount             - Connect a user to a bank account
+`;
 
 var mainLoop = (databaseConnOpt, version) => {
     readlineInterface.setPrompt('Internetbanken$ ');
