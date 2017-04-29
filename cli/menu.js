@@ -116,6 +116,16 @@ readlineInterface.on('line', (line) => {
             });
         break;
 
+        case "connectusertoaccount":
+            sql.connectUserToAccount(readlineInterface)
+            .then(() => {
+                readlineInterface.prompt();
+            })
+            .catch((err) => {
+                throw err;
+            });
+        break;
+
         case "":
             readlineInterface.prompt();
         break;

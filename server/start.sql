@@ -160,6 +160,42 @@ $$
 
 
 /*
+----------------------------------------------------
+-- Create procedure connectAccountHolderToAccount --
+----------------------------------------------------
+*/
+
+DROP PROCEDURE IF EXISTS connectAccountHolderToAccount$$
+CREATE PROCEDURE connectAccountHolderToAccount(
+    accountHolderId INTEGER,
+    accountId INTEGER
+)
+BEGIN
+
+    DECLARE accountExists INTEGER;
+
+    START TRANSACTION;
+
+    SET accountExists = (SELECT balance FROM Account WHERE Account.accountNr LIKE accountNr);
+
+    IF accountExists IS NULL THEN
+        ROLLBACK;
+        SELECT "Account doesn't exist!";
+    ELSE
+
+        INSERT INTO UserAccount (userId, accountId) VALUES
+            (accountHolderId, accountId);
+
+        SELECT "The user has been added to the account.";
+
+    COMMIT;
+    END IF;
+END
+$$
+
+
+
+/*
 -----------------------------------------------------
 -- Create procedure createNewAccountToLoggedInUser --
 -----------------------------------------------------

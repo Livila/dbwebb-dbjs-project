@@ -250,6 +250,25 @@ sql.addAccount = (ri) => {
 }
 
 
+sql.connectUserToAccount = (ri) => {
+    return new Promise((resolve, reject) => {
+        var accountHolderId, accountId;
+
+        ask(ri, "Enter User Id: ").then((answer) => {
+            accountHolderId = answer;
+        }).then(() => {
+        ask(ri, "Enter Account Id: ").then((answer) => {
+            accountId = answer;
+        }).then(() => {
+            sqlPromise(`CALL connectAccountHolderToAccount(${accountHolderId}, ${accountId});`)
+                .catch((err) => {
+                    console.log("Something went wrong... " + err);
+                });
+        })})})
+    });
+}
+
+
 /**
  * Export module
  */
