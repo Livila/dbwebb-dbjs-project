@@ -1,0 +1,14 @@
+include incl/header.pug
+
+body
+    <div id=movemoneybd>
+        p Ditt nya konto är nu skapat!
+            <form method="post" action="/startpage">
+                <input type="hidden" name="userid" value="#{object.userid}">
+                <input type="hidden" name="usercode" value="#{object.usercode}">
+                <input type="hidden" name="code" value="#{object.code}">
+                <input type="submit" name="createacc" value="Återgå">
+            </form>
+    </div>
+  
+include incl/footer.pug

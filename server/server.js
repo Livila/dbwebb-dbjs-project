@@ -45,9 +45,9 @@ const movemoney = require('./routes/movemoney.js');
 app.use("/movemoney", movemoney);
 const swish = require('./routes/swish.js');
 app.use("/swish", swish);
+const createacc = require('./routes/createacc.js');
+app.use("/createacc", createacc);
 /*
-const log = require('./routes/log.js');
-app.use("/log", log);
 const move = require('./routes/move.js');
 app.use("/move", move);
 const movereq = require('./routes/movereq.js');

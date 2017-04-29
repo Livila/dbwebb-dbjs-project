@@ -39,7 +39,14 @@ if object
             <input type="submit" name="MoveMoney" value="Flytta pengar">
         </form>
     </div>
+    <div id=createacc>
+        p Klicka här för att generera fram ett nytt konto kopplat till dig.
+        <form method="post" action="/createacc">
+            <input type="hidden" name="userid" value="#{object.userid}">
+            <input type="hidden" name="usercode" value="#{object.usercode}">
+            <input type="submit" name="createacc" value="Skapa ett nytt konto">
+        </form>
+    </div>
 else
     p Bad login
-- console.log(resultset)
 include incl/footer.pug

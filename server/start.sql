@@ -119,8 +119,45 @@ CREATE VIEW VUserAndAccount AS
 END
 $$ -- End of procedure createdatabase
 
+/*
+-------------------------------------------------
+------- Create procedure createNewAccount -------
+-------------------------------------------------
+*/
+DROP PROCEDURE IF EXISTS createNewAccountToLoggedInUser$$
+CREATE PROCEDURE createNewAccountToLoggedInUser(
+    userId INTEGER,
+    pinCode INTEGER
+)
+BEGIN
 
+    DECLARE newAccountNr NUMERIC(16, 0);
+    DECLARE newAccountId INTEGER;
 
+    START TRANSACTION;
+
+    SET newAccountNr = (SELECT MAX(accountNr) FROM Account) + 111;
+    SET newAccountId = (SELECT MAX(accountId) FROM UserAccount) + 1;
+    
+    
+        -- Check if it's the correct pin code.
+    IF (SELECT pinCode FROM User WHERE User.userId = userId AND User.pinCode = pinCode) IS NULL THEN
+        ROLLBACK;
+        SELECT "Wrong pin code!";
+    END IF;
+    
+    INSERT INTO Account
+    (accountNr, balance)
+	VALUES
+    (newAccountNr, 0);
+    
+    INSERT INTO UserAccount
+    (userId, accountId)
+	VALUES
+    (userId, newAccountId);
+    
+    COMMIT;
+END$$
 /*
 -------------------------------------------------
 ---------- Create procedure moveMoney -----------
@@ -293,45 +330,35 @@ BEGIN
     DECLARE currentDate CHAR(10);
     DECLARE counter INT;
     DECLARE max INT;
-
     SET max = (SELECT MAX(id) FROM interestLog);
     SET counter = 1;
     SET currentDate = CURDATE();
-    
+
     ALTER TABLE interestLog
     ADD currentDate INT;
-
     forEveryAccount: LOOP
     IF counter > max THEN
     LEAVE forEveryAccount;
     END IF;
-
     SET counter = counter + 1;
-
-
     UPDATE interestLog
         SET
             currentDate = (SELECT balance FROM Account WHERE id = counter) * (SELECT interest FROM Bank WHERE id = 1)
         WHERE
             id = counter;
-    
+
     ITERATE forEveryAccount;
     END LOOP;
 
-            
-
 END
 $$ -- End of procedure calculateInterest
-
-
-
 /*
 -------------------------------------------------
 --------- Procedure to fill the database --------
 -------------------------------------------------
 */
 
-DROP PROCEDURE IF EXISTS filldatabase;
+DROP PROCEDURE IF EXISTS filldatabase$$
 CREATE PROCEDURE filldatabase()
 BEGIN
 
@@ -468,7 +495,12 @@ DELIMITER ;
 
 CALL createdatabase;
 CALL filldatabase;
-
-
+/*
+SELECT * FROM Account;
+SELECT * FROM UserAccount;
+CALL createNewAccountToLoggedInUser(15, 1395);
+SELECT * FROM Account;
+SELECT * FROM UserAccount;
+*/
 
 -- EXTRAS
