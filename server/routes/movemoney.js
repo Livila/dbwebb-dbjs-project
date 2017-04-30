@@ -1,4 +1,5 @@
 "use strict";
+
 const express = require('express');
 const router = express.Router();
 const database = require('../dbstartup.js');
@@ -19,7 +20,7 @@ router.post("/", (request, resolve) => {
         CALL webMoveMoney(${request.body.userid}, ${request.body.usercode}, ${request.body.fromaccountnr}, ${request.body.amount}, ${request.body.toaccountnr});
         `;
         database.sqlpromise(data.sql)
-        .then((result) => {
+        .then(() => {
             resolve.render("movemoney", data);
         });
 
@@ -30,7 +31,7 @@ router.post("/", (request, resolve) => {
             CALL swishMoney(${request.body.userid}, ${request.body.usercode}, ${request.body.fromaccountnr}, ${request.body.amount}, ${request.body.toaccountnr});
             `;
             database.sqlpromise(data.sql)
-            .then((result) => {
+            .then(() => {
                 resolve.render("movemoney", data);
             });
         }

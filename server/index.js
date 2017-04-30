@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 "use strict";
 const server = require('./server.js'); // jshint ignore:line
-const database = require('./dbstartup.js')
+const database = require('./dbstartup.js');
 database.startup();
 /*
 const dbstartup = require('./dbstartup.js');

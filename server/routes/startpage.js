@@ -21,8 +21,8 @@ router.post("/", (request, resolve) => {
     UserAccount
         INNER JOIN
     User ON User.userId LIKE UserAccount.userId
-		INNER JOIN
-	Account ON Account.accountId LIKE UserAccount.accountId
+        INNER JOIN
+    Account ON Account.accountId LIKE UserAccount.accountId
     WHERE
     User.userId LIKE '${request.body.userid}' AND User.pinCode LIKE '${request.body.usercode}';
     `;
@@ -34,7 +34,7 @@ router.post("/", (request, resolve) => {
                 lastname: result[0].lastName,
                 userid: request.body.userid,
                 usercode: request.body.usercode
-            }
+            };
             data.accounts = result;
         }
     });
@@ -51,8 +51,8 @@ router.post("/", (request, resolve) => {
     UserAccount
         INNER JOIN
     User ON User.userId LIKE UserAccount.userId
-		INNER JOIN
-	Account ON Account.accountId LIKE UserAccount.accountId
+        INNER JOIN
+    Account ON Account.accountId LIKE UserAccount.accountId
     WHERE
     UserAccount.accountId IN (SELECT
             UserAccount.accountId
@@ -72,6 +72,6 @@ router.post("/", (request, resolve) => {
     });
 });
 router.get("/", (request, resolve) => {
-        resolve.redirect("/login");
+    resolve.redirect("/login");
 });
 module.exports = router;

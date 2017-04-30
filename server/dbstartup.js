@@ -4,13 +4,13 @@ const mysql = require("mysql");
 const database = {};
 var mysqlDatabase;
 
-database.startup = (optionsArg) => {
+database.startup = () => {
     let data = {
-        host     : "127.0.0.1", /* `127.0.0.1` */
+        host     : "127.0.0.1",
         user     : "root",
         password : "",
         database : "internetbanken"
-    }
+    };
     mysqlDatabase = mysql.createConnection(data);
     console.log(data);
     //koppla mig till databasen

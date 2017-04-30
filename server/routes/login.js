@@ -9,7 +9,7 @@ router.get("/", (request, resolve) => {
     data.message = `Vänligen skriv in dina användareuppgifter nedanför`;
     data.object = {
         code: "100"
-    }
+    };
     resolve.render("login", data);
 });
 module.exports = router;

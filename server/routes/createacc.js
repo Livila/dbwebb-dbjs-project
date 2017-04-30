@@ -1,4 +1,5 @@
 "use strict";
+
 const express = require('express');
 const router = express.Router();
 const database = require('../dbstartup.js');
@@ -15,7 +16,7 @@ router.post("/", (request, resolve) => {
     CALL createNewAccountToLoggedInUser(${request.body.userid}, ${request.body.usercode});
     `;
     database.sqlpromise(data.sql)
-    .then((result) => {
+    .then(() => {
         resolve.render("createacc", data);
     });
 });
