@@ -91,7 +91,7 @@ CREATE TABLE CustomerLog (
 
 CREATE TABLE InterestLog (
     id INTEGER AUTO_INCREMENT PRIMARY KEY,
-    dateAddedToLog DATETIME NOT NULL,
+    dateOfCalculation DATETIME NOT NULL,
     accountNr NUMERIC(16, 0) NOT NULL,
     interestSum NUMERIC(16, 3) NOT NULL
 );
@@ -234,6 +234,26 @@ BEGIN
     END IF;
 END$$
 
+
+DROP PROCEDURE IF EXISTS insertMoney$$
+CREATE PROCEDURE insertMoney(
+    accountNr INTEGER,
+    amount INTEGER
+)
+BEGIN
+    START TRANSACTION;
+
+    IF (SELECT balance FROM Account WHERE accountNr LIKE accountNr) IS NULL THEN
+        ROLLBACK;
+        SELECT "Account number does not exist.";
+    ELSE
+        INSERT INTO Account(accountNr, amount)
+            VALUES (accountNr, amount);
+
+        COMMIT;
+    END IF;
+END
+$$
 
 
 /*
@@ -391,51 +411,55 @@ $$ -- End of procedure moveMoneyWeb
 */
 DROP PROCEDURE IF EXISTS calculateInterest$$
 CREATE PROCEDURE calculateInterest(
-    accountNr INTEGER,
-    interestSum NUMERIC(16, 3)
+    dateOfCalculation DATETIME,
+    interestRate NUMERIC(3, 2),
+    accountNr INTEGER
 )
 BEGIN
-    INSERT INTO InterestLog (dateOfCalculation, accountNr, interestSum)
-        VALUES (NOW(), accountNr, ((SELECT interestRate FROM Bank WHERE id=1) * balance / 365));
+    DECLARE balance INTEGER;
+    SET balance = (SELECT balance FROM Account WHERE Account.accountNr = accountNr);
+
+    IF balance != 0 THEN
+        INSERT INTO InterestLog (dateOfCalculation, accountNr, interestSum)
+            VALUES (dateOfCalculation, accountNr, (interestRate * balance) / 365);
+    END IF;
 END
 $$
 
-/*
-DROP PROCEDURE IF EXISTS calculateInterest$$
-CREATE PROCEDURE calculateInterest(
+
+DROP PROCEDURE IF EXISTS calculateAllInterests$$
+CREATE PROCEDURE calculateAllInterests(
+    dateOfCalculation DATETIME,
+    interestRate NUMERIC(3, 2)
 )
 BEGIN
-    DECLARE currentDate CHAR(10);
-    DECLARE counter INT;
+    DECLARE count INT;
     DECLARE max INT;
+    SET count = 1;
     SET max = (SELECT MAX(id) FROM InterestLog);
-    SET counter = 1;
-    SET currentDate = CURDATE();
 
-    ALTER TABLE InterestLog
-    ADD currentDate INT;
-    forEveryAccount: LOOP
-    IF counter > max THEN
+forEveryAccount: LOOP
+IF count > max THEN
     LEAVE forEveryAccount;
-    END IF;
-    SET counter = counter + 1;
-    UPDATE InterestLog
-        SET
-            currentDate = (SELECT balance FROM Account WHERE id = counter) * (SELECT interest FROM Bank WHERE id = 1)
-        WHERE
-            id = counter;
+END IF;
+SET count = count + 1;
 
-    ITERATE forEveryAccount;
-    END LOOP;
+    IF (SELECT accountNr FROM Account WHERE accountId = count) IS NOT NULL THEN
+        CALL calculateInterest(dateOfCalculation, interestRate, (SELECT accountNr FROM Account WHERE accountId = count));
+    END IF;
+
+ITERATE forEveryAccount;
+END LOOP;
 
 END
-$$ -- End of procedure calculateInterest
+$$ -- End of procedure calculateAllInterests
+
+
 /*
 -------------------------------------------------
 --------- Procedure to fill the database --------
 -------------------------------------------------
 */
-
 DROP PROCEDURE IF EXISTS filldatabase$$
 CREATE PROCEDURE filldatabase()
 BEGIN
@@ -501,7 +525,7 @@ VALUES
     ('4929127317239714', 1000);
 
 INSERT INTO InterestLog
-	(dateAddedToLog, accountNr, interestSum)
+	(dateOfCalculation, accountNr, interestSum)
 VALUES
 	(NOW(), '5285415127177850', 0),
     (NOW(), '5379026026843638', 0),
