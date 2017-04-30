@@ -421,7 +421,7 @@ sql.showLog = (ri) => {
             var prettyPrint = (res) => {
                 res.forEach((row) => {
                     if (respond == '1') {
-                        console.log(`${row.dateAddedToLog} - ${row.id}: ${row.accountNr} ${row.interestSum}kr interest`);
+                        console.log(`${row.dateOfCalculation} - ${row.id}: ${row.accountNr} ${row.interestSum}kr interest`);
                     } else if (respond == '2') {
                         console.log(`${row.transferDate} - ${row.transferType}
 ${row.userId} sent ${row.amountSent}kr from ${row.accountNrTo} to ${row.accountNrFrom}`);

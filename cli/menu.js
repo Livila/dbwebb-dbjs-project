@@ -27,36 +27,32 @@ const helpText = `Available commands (not case sensitive):
   showBank                         - Show the bank account
 `;
 
-var connectToDatabaseQuestion = (databaseConnOpt, err) => {
-
-};
-
 var connectToDatabase = (databaseConnOpt) => {
     sql.init(databaseConnOpt)
-    .then(() => {
-        console.log('Connected!');
-        console.log(helpText);
-        readlineInterface.prompt();
-    })
-    .catch((err) => {
-        console.log('Something went wrong... please make sure that:');
-        console.log(' - that the database exists.');
-        console.log(' - that you are using the correct username and password.');
-        console.log(' - that the user you are using has enough permission.');
-        console.log();
+        .then(() => {
+            console.log('Connected!');
+            console.log(helpText);
+            readlineInterface.prompt();
+        })
+        .catch((err) => {
+            console.log('Something went wrong... please make sure that:');
+            console.log(' - that the database exists.');
+            console.log(' - that you are using the correct username and password.');
+            console.log(' - that the user you are using has enough permission.');
+            console.log();
 
-        readlineInterface.question('Do you want to try again? (log/yes/no)', function(answer) {
-            if (answer == 'yes' || answer == 'y') {
-                connectToDatabase(databaseConnOpt);
-            } else if (answer == 'log' || answer == 'l') {
-                console.log(err);
-                connectToDatabaseQuestion(databaseConnOpt, err);
-            } else {
-                console.log('See you!');
-                process.exit(1);
-            }
+            readlineInterface.question('Do you want to try again? (log/yes/no)', function (answer) {
+                if (answer == 'yes' || answer == 'y') {
+                    connectToDatabase(databaseConnOpt);
+                } else if (answer == 'log' || answer == 'l') {
+                    console.log(err);
+                    process.exit(1);
+                } else {
+                    console.log('See you!');
+                    process.exit(1);
+                }
+            });
         });
-    });
 };
 
 var mainLoop = (databaseConnOpt, version) => {
@@ -73,170 +69,174 @@ var exitMainLoop = () => {
 };
 
 
-readlineInterface.on('line', (line) => {
+var readlineInterfaceCon = (line) => {
     switch (line.trim().toLowerCase()) {
-        case "exit":
-            exitMainLoop();
-        break;
-
-        case "help":
-            console.log(helpText);
-            readlineInterface.prompt();
-        break;
-
-        case "version":
-            console.log("Version " + VERSION);
-            readlineInterface.prompt();
-        break;
-
-        case "resetdatabase":
-            sql.resetDatabase();
-            readlineInterface.prompt();
-        break;
-
-        case "filldatabase":
-            sql.fillDatabase();
-            readlineInterface.prompt();
-        break;
-
-        case "showusers":
-            sql.showUsers()
-            .then(() => {
-                readlineInterface.prompt();
-            })
-            .catch((err) => {
-                throw err;
-            });
-        break;
-
-        case "showspecuser":
-            sql.showSpecUser(readlineInterface)
-            .then(() => {
-                readlineInterface.prompt();
-            })
-            .catch((err) => {
-                throw err;
-            });
-        break;
-
-        case "adduser":
-            sql.addUser(readlineInterface)
-            .then(() => {
-                readlineInterface.prompt();
-            })
-            .catch((err) => {
-                throw err;
-            });
-        break;
-
-        case "addaccount":
-            sql.addAccount(readlineInterface)
-            .then(() => {
-                readlineInterface.prompt();
-            })
-            .catch((err) => {
-                throw err;
-            });
-        break;
-
-        case "connectusertoaccount":
-            sql.connectUserToAccount(readlineInterface)
-            .then(() => {
-                readlineInterface.prompt();
-            })
-            .catch((err) => {
-                throw err;
-            });
-        break;
-
         case "calculateallinterests":
-            sql.calculateAllInterests()
-            .then(() => {
+            sql.calculateAllInterests().then(() => {
                 readlineInterface.prompt();
-            })
-            .catch((err) => {
+            }).catch((err) => {
                 throw err;
             });
-        break;
+            break;
 
         case "calculateinterest":
-            sql.calculateInterest(readlineInterface)
-            .then(() => {
+            sql.calculateInterest(readlineInterface).then(() => {
                 readlineInterface.prompt();
-            })
-            .catch((err) => {
+            }).catch((err) => {
                 throw err;
             });
-        break;
+            break;
 
         case "showallaccumulatedinterests":
-            sql.showAllAccumulatedInterests()
-            .then(() => {
+            sql.showAllAccumulatedInterests().then(() => {
                 readlineInterface.prompt();
-            })
-            .catch((err) => {
+            }).catch((err) => {
                 throw err;
             });
-        break;
+            break;
 
         case "showaccumulatedinterest":
-            sql.showAccumulatedInterest(readlineInterface)
-            .then(() => {
+            sql.showAccumulatedInterest(readlineInterface).then(() => {
                 readlineInterface.prompt();
-            })
-            .catch((err) => {
+            }).catch((err) => {
                 throw err;
             });
-        break;
+            break;
 
         case "showlog":
-            sql.showLog(readlineInterface)
-            .then(() => {
+            sql.showLog(readlineInterface).then(() => {
                 readlineInterface.prompt();
-            })
-            .catch((err) => {
+            }).catch((err) => {
                 throw err;
             });
-        break;
+            break;
 
         case "showbank":
-            sql.showBank()
-            .then(() => {
+            sql.showBank().then(() => {
                 readlineInterface.prompt();
-            })
-            .catch((err) => {
+            }).catch((err) => {
                 throw err;
             });
-        break;
+            break;
 
         case "movemoneyweb":
-            sql.moveMoneyWeb()
-            .then(() => {
+            sql.moveMoneyWeb().then(() => {
                 readlineInterface.prompt();
-            })
-            .catch((err) => {
+            }).catch((err) => {
                 throw err;
             });
-        break;
+            break;
 
         case "movemoneyswish":
-            sql.moveMoneySwish()
-            .then(() => {
+            sql.moveMoneySwish().then(() => {
                 readlineInterface.prompt();
-            })
-            .catch((err) => {
+            }).catch((err) => {
                 throw err;
             });
-        break;
+            break;
 
         case "":
             readlineInterface.prompt();
-        break;
+            break;
 
         default:
             console.log('Error: Please try another command. ' + helpText);
             readlineInterface.prompt();
-        break;
+            break;
+    }
+};
+
+readlineInterface.on('line', (line) => {
+    var hasExecuted = 0;
+
+    switch (line.trim().toLowerCase()) {
+        case "exit":
+            hasExecuted = 1;
+            exitMainLoop();
+            break;
+
+        case "help":
+            hasExecuted = 1;
+            console.log(helpText);
+            readlineInterface.prompt();
+            break;
+
+        case "version":
+            hasExecuted = 1;
+            console.log("Version " + VERSION);
+            readlineInterface.prompt();
+            break;
+
+        case "resetdatabase":
+            hasExecuted = 1;
+            sql.resetDatabase();
+            readlineInterface.prompt();
+            break;
+
+        case "filldatabase":
+            hasExecuted = 1;
+            sql.fillDatabase();
+            readlineInterface.prompt();
+            break;
+
+        case "showusers":
+            hasExecuted = 1;
+            sql.showUsers().then(() => {
+                readlineInterface.prompt();
+            }).catch((err) => {
+                throw err;
+            });
+            break;
+
+        case "showspecuser":
+            hasExecuted = 1;
+            sql.showSpecUser(readlineInterface).then(() => {
+                readlineInterface.prompt();
+            }).catch((err) => {
+                throw err;
+            });
+            break;
+
+        case "adduser":
+            hasExecuted = 1;
+            sql.addUser(readlineInterface).then(() => {
+                readlineInterface.prompt();
+            }).catch((err) => {
+                throw err;
+            });
+            break;
+
+        case "addaccount":
+            hasExecuted = 1;
+            sql.addAccount(readlineInterface).then(() => {
+                readlineInterface.prompt();
+            }).catch((err) => {
+                throw err;
+            });
+            break;
+
+        case "connectusertoaccount":
+            hasExecuted = 1;
+            sql.connectUserToAccount(readlineInterface).then(() => {
+                readlineInterface.prompt();
+            }).catch((err) => {
+                throw err;
+            });
+            break;
+
+        case "":
+            readlineInterface.prompt();
+            break;
+
+        default:
+            console.log('Error: Please try another command. ' + helpText);
+            readlineInterface.prompt();
+            break;
+    }
+
+    // Because of a jshint warning.
+    if (hasExecuted === 0) {
+        readlineInterfaceCon(line);
     }
 });
 
