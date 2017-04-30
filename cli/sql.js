@@ -26,10 +26,11 @@ sql.init = (databaseConnOpt) => {
         port: databaseConnOpt.port,
         user: databaseConnOpt.user,
         password: databaseConnOpt.password,
-        database: databaseConnOpt.database });
+        database: databaseConnOpt.database
+    });
 
     return new Promise((resolve, reject) => {
-            connection.connect(function(err) {
+        connection.connect(function (err) {
             if (err) {
                 reject(err);
             }
@@ -78,7 +79,7 @@ function sqlPromise(sql) {
 
 function ask(readlineInterface, question) {
     return new Promise((resolve, reject) => {
-        readlineInterface.question(question, function(answer) {
+        readlineInterface.question(question, function (answer) {
             resolve(answer);
         });
     })
@@ -89,7 +90,7 @@ sql.resetDatabase = () => {
         'CALL createdatabase;'
     ];
 
-    sql.forEach(function(value) {
+    sql.forEach(function (value) {
         connection.query(value, (err) => {
             if (err) {
                 console.log(err);
@@ -103,9 +104,9 @@ sql.resetDatabase = () => {
 sql.fillDatabase = () => {
     var sql = [
         'CALL filldatabase;'
-];
+    ];
 
-    sql.forEach(function(value) {
+    sql.forEach(function (value) {
         connection.query(value, (err) => {
             if (err) {
                 console.log(err);
@@ -166,23 +167,27 @@ sql.moveMoneyWeb = (ri) => {
         ask(ri, "Enter User Id: ").then((answer) => {
             userId = answer;
         }).then(() => {
-        ask(ri, "Enter Pin Code: ").then((answer) => {
-            pinCode = answer;
-        }).then(() => {
-        ask(ri, "Enter the account to transfer from: ").then((answer) => {
-            fromAccountNr = answer;
-        }).then(() => {
-        ask(ri, "Enter the amount you want to transfer: ").then((answer) => {
-            amount = answer;
-        }).then(() => {
-        ask(ri, "Enter the account to transfer to: ").then((answer) => {
-            toAccountNr = answer;
-        }).then(() => {
-            resolve(sqlPromise(`CALL moveMoneyWeb(${userId}, ${pinCode}, ${fromAccountNr}, ${amount}, ${toAccountNr});`)
-                .catch((err) => {
-                    console.log("Something went wrong... " + err);
-                }))
-        })})})})})
+            ask(ri, "Enter Pin Code: ").then((answer) => {
+                pinCode = answer;
+            }).then(() => {
+                ask(ri, "Enter the account to transfer from: ").then((answer) => {
+                    fromAccountNr = answer;
+                }).then(() => {
+                    ask(ri, "Enter the amount you want to transfer: ").then((answer) => {
+                        amount = answer;
+                    }).then(() => {
+                        ask(ri, "Enter the account to transfer to: ").then((answer) => {
+                            toAccountNr = answer;
+                        }).then(() => {
+                            resolve(sqlPromise(`CALL moveMoneyWeb(${userId}, ${pinCode}, ${fromAccountNr}, ${amount}, ${toAccountNr});`)
+                                .catch((err) => {
+                                    console.log("Something went wrong... " + err);
+                                }))
+                        })
+                    })
+                })
+            })
+        })
     });
 }
 
@@ -196,23 +201,27 @@ sql.moveMoneySwish = (ri) => {
         ask(ri, "Enter User Id: ").then((answer) => {
             userId = answer;
         }).then(() => {
-        ask(ri, "Enter Pin Code: ").then((answer) => {
-            pinCode = answer;
-        }).then(() => {
-        ask(ri, "Enter the account to transfer from: ").then((answer) => {
-            fromAccountNr = answer;
-        }).then(() => {
-        ask(ri, "Enter the amount you want to transfer: ").then((answer) => {
-            amount = answer;
-        }).then(() => {
-        ask(ri, "Enter the account to transfer to: ").then((answer) => {
-            toAccountNr = answer;
-        }).then(() => {
-            resolve(sqlPromise(`CALL moveMoneySwish(${userId}, ${pinCode}, ${fromAccountNr}, ${amount}, ${toAccountNr});`)
-                .catch((err) => {
-                    console.log("Something went wrong... " + err);
-                }))
-        })})})})})
+            ask(ri, "Enter Pin Code: ").then((answer) => {
+                pinCode = answer;
+            }).then(() => {
+                ask(ri, "Enter the account to transfer from: ").then((answer) => {
+                    fromAccountNr = answer;
+                }).then(() => {
+                    ask(ri, "Enter the amount you want to transfer: ").then((answer) => {
+                        amount = answer;
+                    }).then(() => {
+                        ask(ri, "Enter the account to transfer to: ").then((answer) => {
+                            toAccountNr = answer;
+                        }).then(() => {
+                            resolve(sqlPromise(`CALL moveMoneySwish(${userId}, ${pinCode}, ${fromAccountNr}, ${amount}, ${toAccountNr});`)
+                                .catch((err) => {
+                                    console.log("Something went wrong... " + err);
+                                }))
+                        })
+                    })
+                })
+            })
+        })
     });
 }
 
@@ -226,36 +235,43 @@ sql.addUser = (ri) => {
         ask(ri, "Enter Pin Code [4]: ").then((answer) => {
             pinCode = answer;
         }).then(() => {
-        ask(ri, "Enter Civic Number [10]: ").then((answer) => {
-            civicNumber = answer;
-        }).then(() => {
-        ask(ri, "Enter First Name [20]: ").then((answer) => {
-            firstName = answer;
-        }).then(() => {
-        ask(ri, "Enter Last Name [20]: ").then((answer) => {
-            lastName = answer;
-        }).then(() => {
-        ask(ri, "Enter Street [20]: ").then((answer) => {
-            street = answer;
-        }).then(() => {
-        ask(ri, "Enter Zip [5]: ").then((answer) => {
-            zip = answer;
-        }).then(() => {
-        ask(ri, "Enter City [20]: ").then((answer) => {
-            city = answer;
-        }).then(() => {
-        ask(ri, "Enter Phone [12]: ").then((answer) => {
-            phone = answer;
-        }).then(() => {
-            resolve(sqlPromise(`INSERT INTO User (pinCode, civicNumber, firstName, lastName, street, zip, city, phone)
+            ask(ri, "Enter Civic Number [10]: ").then((answer) => {
+                civicNumber = answer;
+            }).then(() => {
+                ask(ri, "Enter First Name [20]: ").then((answer) => {
+                    firstName = answer;
+                }).then(() => {
+                    ask(ri, "Enter Last Name [20]: ").then((answer) => {
+                        lastName = answer;
+                    }).then(() => {
+                        ask(ri, "Enter Street [20]: ").then((answer) => {
+                            street = answer;
+                        }).then(() => {
+                            ask(ri, "Enter Zip [5]: ").then((answer) => {
+                                zip = answer;
+                            }).then(() => {
+                                ask(ri, "Enter City [20]: ").then((answer) => {
+                                    city = answer;
+                                }).then(() => {
+                                    ask(ri, "Enter Phone [12]: ").then((answer) => {
+                                        phone = answer;
+                                    }).then(() => {
+                                        resolve(sqlPromise(`INSERT INTO User (pinCode, civicNumber, firstName, lastName, street, zip, city, phone)
                 VALUES (${pinCode}, ${civicNumber}, '${firstName}', '${lastName}', '${street}', ${zip}, '${city}', ${phone});`)
-                .then(() => {
-                    console.log("The new user has been added.");
+                                            .then(() => {
+                                                console.log("The new user has been added.");
+                                            })
+                                            .catch((err) => {
+                                                console.log("Something went wrong... " + err);
+                                            }));
+                                    })
+                                })
+                            })
+                        })
+                    })
                 })
-                .catch((err) => {
-                    console.log("Something went wrong... " + err);
-                }));
-        })})})})})})})})
+            })
+        })
     });
 }
 
@@ -269,17 +285,19 @@ sql.addAccount = (ri) => {
         ask(ri, "Enter Account Nr [16]: ").then((answer) => {
             accountNr = answer;
         }).then(() => {
-        ask(ri, "Enter Start Balance [16]: ").then((answer) => {
-            startBalance = answer;
-        }).then(() => {
-        ask(ri, "Enter user id the account belongs to: ").then((answer) => {
-            accountHolderId = answer;
-        }).then(() => {
-            resolve(sqlPromise(`CALL createNewAccount(${accountNr}, ${startBalance}, ${accountHolderId});`)
-                .catch((err) => {
-                    console.log("Something went wrong... " + err);
-                }))
-        })})})
+            ask(ri, "Enter Start Balance [16]: ").then((answer) => {
+                startBalance = answer;
+            }).then(() => {
+                ask(ri, "Enter user id the account belongs to: ").then((answer) => {
+                    accountHolderId = answer;
+                }).then(() => {
+                    resolve(sqlPromise(`CALL createNewAccount(${accountNr}, ${startBalance}, ${accountHolderId});`)
+                        .catch((err) => {
+                            console.log("Something went wrong... " + err);
+                        }))
+                })
+            })
+        })
     });
 }
 
@@ -293,14 +311,15 @@ sql.connectUserToAccount = (ri) => {
         ask(ri, "Enter User Id: ").then((answer) => {
             accountHolderId = answer;
         }).then(() => {
-        ask(ri, "Enter Account Id: ").then((answer) => {
-            accountId = answer;
-        }).then(() => {
-            sqlPromise(`CALL connectAccountHolderToAccount(${accountHolderId}, ${accountId});`)
-                .catch((err) => {
-                    console.log("Something went wrong... " + err);
-                });
-        })})
+            ask(ri, "Enter Account Id: ").then((answer) => {
+                accountId = answer;
+            }).then(() => {
+                sqlPromise(`CALL connectAccountHolderToAccount(${accountHolderId}, ${accountId});`)
+                    .catch((err) => {
+                        console.log("Something went wrong... " + err);
+                    });
+            })
+        })
     });
 }
 
@@ -321,20 +340,23 @@ sql.calculateInterest = (ri) => {
         ask(ri, "Enter Date Of Calculation: ").then((answer) => {
             dateOfCalculation = answer;
         }).then(() => {
-        ask(ri, "Enter Account Nr: ").then((answer) => {
-            accountNr = answer;
-        }).then(() => {
-        ask(ri, "Enter The Interest Rate: ").then((answer) => {
-            interest = answer;
-        }).then(() => {
-            resolve(sqlPromise(`CALL calculateInterest(${dateOfCalculation}, ${accountNr}, ${interest})`))
-            .then(() => {
-                console.log("OK!");
+            ask(ri, "Enter Account Nr: ").then((answer) => {
+                accountNr = answer;
+            }).then(() => {
+                ask(ri, "Enter The Interest Rate: ").then((answer) => {
+                    interest = answer;
+                }).then(() => {
+                    resolve(sqlPromise(`CALL calculateInterest(${dateOfCalculation}, ${accountNr}, ${interest})`))
+                        .then(() => {
+                            console.log("OK!");
+                        })
+                        .catch((err) => {
+                            console.log("Something went wrong... " + err);
+                        })
+                })
             })
-            .catch((err) => {
-                    console.log("Something went wrong... " + err);
-            })
-    })})})});
+        })
+    });
 };
 
 /**
@@ -370,7 +392,8 @@ sql.showAccumulatedInterest = () => {
             };
 
             resolve(queryPromise(sql, prettyPrint));
-    })});
+        })
+    });
 };
 
 /**
