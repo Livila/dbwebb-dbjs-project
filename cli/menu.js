@@ -27,11 +27,8 @@ const helpText = `Available commands (not case sensitive):
   showBank                         - Show the bank account
 `;
 
-var mainLoop = (databaseConnOpt, version) => {
-    readlineInterface.setPrompt('Internetbanken$ ');
-    VERSION = version;
+var connectToDatabaseQuestion = (databaseConnOpt, err) => {
 
-    connectToDatabase(databaseConnOpt);
 };
 
 var connectToDatabase = (databaseConnOpt) => {
@@ -48,24 +45,26 @@ var connectToDatabase = (databaseConnOpt) => {
         console.log(' - that the user you are using has enough permission.');
         console.log();
 
-        connectToDatabaseQuestion(databaseConnOpt, err);
+        readlineInterface.question('Do you want to try again? (log/yes/no)', function(answer) {
+            if (answer == 'yes' || answer == 'y') {
+                connectToDatabase(databaseConnOpt);
+            } else if (answer == 'log' || answer == 'l') {
+                console.log(err);
+                connectToDatabaseQuestion(databaseConnOpt, err);
+            } else {
+                console.log('See you!');
+                process.exit(1);
+            }
+        });
     });
-}
+};
 
-var connectToDatabaseQuestion = (databaseConnOpt, err) => {
-    readlineInterface.question('Do you want to try again? (log/yes/no)', function(answer) {
-        if (answer == 'yes' || answer == 'y') {
-            connectToDatabase(databaseConnOpt);
-        } else if (answer == 'log' || answer == 'l') {
-            console.log(err);
-            connectToDatabaseQuestion(databaseConnOpt, err);
-        } else {
-            console.log('See you!');
-            process.exit(1);
-        }
-    });
-}
+var mainLoop = (databaseConnOpt, version) => {
+    readlineInterface.setPrompt('Internetbanken$ ');
+    VERSION = version;
 
+    connectToDatabase(databaseConnOpt);
+};
 
 var exitMainLoop = () => {
     sql.end();
