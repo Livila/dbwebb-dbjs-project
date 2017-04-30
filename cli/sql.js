@@ -284,6 +284,13 @@ sql.connectUserToAccount = (ri) => {
 }
 
 /**
+ * Display the accumulated interest for each account
+ */
+sql.calculateInterest = () => {
+    return sqlPromise('CALL calculateInterest');
+};
+
+/**
  * Display show log
  */
 sql.showLog = (ri) => {

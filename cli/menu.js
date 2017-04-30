@@ -18,8 +18,8 @@ const helpText = `Available commands (not case sensitive):
   addUser                          - Add a new user
   addAccount                       - Add a new bank account
   connectUserToAccount             - Connect a user to a bank account
-  showInterest                     - Show accumulated interest for each account
-  showLog                          - Show all entries in the log
+  calculateInterest                - Calculate the accumulated interest
+  showLog                          - Show entries in logs interest and customer
   showBank                         - Show the bank account
 `;
 
@@ -138,6 +138,16 @@ readlineInterface.on('line', (line) => {
 
         case "connectusertoaccount":
             sql.connectUserToAccount(readlineInterface)
+            .then(() => {
+                readlineInterface.prompt();
+            })
+            .catch((err) => {
+                throw err;
+            });
+        break;
+
+        case "calculateinterest":
+            sql.calculateInterest()
             .then(() => {
                 readlineInterface.prompt();
             })
