@@ -120,14 +120,13 @@ sql.fillDatabase = () => {
  * Display users
  */
 sql.showUsers = () => {
-
     var sql = `
 SELECT * FROM VUserAndAccount ORDER BY userId;
 ;`;
 
     var prettyPrint = (res) => {
         res.forEach((row, count) => {
-            console.log(`${count} [user ${row.userId}][account ${row.accountId}]: ${row.firstName} ${row.lastName} - ${row.balance}kr`);
+            console.log(`${count} [user ${row.userId}][accId ${row.accountId}]\t${row.accountNr} - ${row.balance}kr: ${row.firstName} ${row.lastName}`);
         });
     };
 
@@ -137,18 +136,24 @@ SELECT * FROM VUserAndAccount ORDER BY userId;
 /**
  * Display specific user
  */
-sql.showSpecUser = (userid) => {
-    var sql = `
-    SELECT * FROM VUserAndAccount WHERE userId = ` + userid +
-    `;`;
+sql.showSpecUser = (ri) => {
+    return new Promise((resolve, reject) => {
+        var userId;
 
-    var prettyPrint = (res) => {
-        res.forEach((row, count) => {
-            console.log(`${count} [user ${row.userId}][account ${row.accountId}]: ${row.firstName} ${row.lastName} - ${row.balance}kr`);
-        });
-    };
+        ask(ri, "Enter User Id: ").then((answer) => {
+            userId = answer;
+        }).then(() => {
+            var sql = `SELECT * FROM VUserAndAccount WHERE userId = ${userId};`;
 
-    return queryPromise(sql, prettyPrint);
+            var prettyPrint = (res) => {
+                res.forEach((row, count) => {
+                    console.log(`${count} [user ${row.userId}][accId ${row.accountId}]\t${row.accountNr} - ${row.balance}kr: ${row.firstName} ${row.lastName}`);
+                });
+            };
+
+            resolve(queryPromise(sql, prettyPrint));
+        })
+    });
 }
 
 /*
@@ -218,12 +223,14 @@ sql.addUser = (ri) => {
         ask(ri, "Enter Phone [12]: ").then((answer) => {
             phone = answer;
         }).then(() => {
-            sqlPromise(`INSERT INTO User (pinCode, civicNumber, firstName, lastName, street, zip, city, phone)
+            resolve(sqlPromise(`INSERT INTO User (pinCode, civicNumber, firstName, lastName, street, zip, city, phone)
                 VALUES (${pinCode}, ${civicNumber}, '${firstName}', '${lastName}', '${street}', ${zip}, '${city}', ${phone});`)
-            .catch((err) => {
-                console.log("Something went wrong... " + err);
-            });
-            console.log("The new user has been added.");
+                .then(() => {
+                    console.log("The new user has been added.");
+                })
+                .catch((err) => {
+                    console.log("Something went wrong... " + err);
+                }));
         })})})})})})})})
     });
 }
@@ -241,14 +248,13 @@ sql.addAccount = (ri) => {
         ask(ri, "Enter user id the account belongs to: ").then((answer) => {
             accountHolderId = answer;
         }).then(() => {
-            sqlPromise(`CALL createNewAccount(${accountNr}, ${startBalance}, ${accountHolderId});`)
+            resolve(sqlPromise(`CALL createNewAccount(${accountNr}, ${startBalance}, ${accountHolderId});`)
                 .catch((err) => {
                     console.log("Something went wrong... " + err);
-                });
+                }))
         })})})
     });
 }
-
 
 sql.connectUserToAccount = (ri) => {
     return new Promise((resolve, reject) => {
@@ -267,6 +273,7 @@ sql.connectUserToAccount = (ri) => {
         })})
     });
 }
+
 
 
 /**

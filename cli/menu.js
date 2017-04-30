@@ -10,13 +10,17 @@ const readlineInterface = readline.createInterface({
 
 const sql = require('./sql');
 
-const helpText = `Available commands:
+const helpText = `Available commands (not case sensitive):
   exit, help, version
-  resetdatabase, filldatabase
-  users                            - Show users
-  adduser                          - Add a new user
-  addaccount                       - Add a new bank account
-  connectusertoaccount             - Connect a user to a bank account
+  resetDatabase, fillDatabase
+  showUsers                        - Show users with accounts
+  showSpecUser                     - Show a specific user
+  addUser                          - Add a new user
+  addAccount                       - Add a new bank account
+  connectUserToAccount             - Connect a user to a bank account
+  showInterest                     - Show accumulated interest for each account
+  showLog                          - Show all entries in the log
+  showBank                         - Show the bank account
 `;
 
 var mainLoop = (databaseConnOpt, version) => {
@@ -92,8 +96,18 @@ readlineInterface.on('line', (line) => {
             readlineInterface.prompt();
         break;
 
-        case "users":
+        case "showusers":
             sql.showUsers()
+            .then(() => {
+                readlineInterface.prompt();
+            })
+            .catch((err) => {
+                throw err;
+            });
+        break;
+
+        case "showspecuser":
+            sql.showSpecUser(readlineInterface)
             .then(() => {
                 readlineInterface.prompt();
             })

@@ -109,7 +109,7 @@ CREATE TABLE interestLog (
 */
 DROP VIEW IF EXISTS `VUserAndAccount`;
 CREATE VIEW VUserAndAccount AS
-    SELECT User.firstName, User.lastName, Account.balance, User.userId, Account.accountId
+    SELECT User.firstName, User.lastName, Account.balance, User.userId, Account.accountId, Account.accountNr
     FROM UserAccount
     INNER JOIN User ON User.userId = UserAccount.userId
     INNER JOIN Account ON UserAccount.accountId = Account.accountId;
