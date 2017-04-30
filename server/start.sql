@@ -21,9 +21,8 @@ BEGIN
 */
 
 -- Drop logs
-DROP TABLE IF EXISTS interestLog;
+DROP TABLE IF EXISTS InterestLog;
 DROP TABLE IF EXISTS CustomerLog;
-DROP TABLE IF EXISTS BankLog;
 
 -- Drop other tables
 DROP TABLE IF EXISTS UserAccount;
@@ -90,12 +89,11 @@ CREATE TABLE CustomerLog (
 );
 
 
-CREATE TABLE interestLog (
+CREATE TABLE InterestLog (
+    id INTEGER AUTO_INCREMENT PRIMARY KEY,
     dateAddedToLog DATETIME NOT NULL,
     accountNr NUMERIC(16, 0) NOT NULL,
     interestSum NUMERIC(16, 3) NOT NULL
-
-    -- FOREIGN KEY (accountNr) REFERENCES Account(accountNr)
 );
 
 -- End of creating tables...
@@ -329,7 +327,7 @@ BEGIN
                 NOW(), userId, toAccountNr, fromAccountNr, amount, "Webservice"
             );
         ELSE
-            INSERT INTO CustomerLog (userId, userId, accountNrTo, accountNrFrom, amountSent, transferType) VALUES (
+            INSERT INTO CustomerLog (transferDate, userId, accountNrTo, accountNrFrom, amountSent, transferType) VALUES (
                 NOW(), userId, toAccountNr, fromAccountNr, amount, "Swish"
             );
         END IF;
@@ -339,7 +337,7 @@ BEGIN
     END IF;
 
     -- Uncomment for debugging...
-    -- SELECT fromAccountBalance AS FromAccount, toAccountBalance AS ToAccount, (amount * percentToUs) AS BankRecieved;
+    -- SELECT fromAccomoveMoneySwishuntBalance AS FromAccount, toAccountBalance AS ToAccount, (amount * percentToUs) AS BankRecieved;
 
 END
 $$ -- End of procedure moveMoney
@@ -397,7 +395,7 @@ CREATE PROCEDURE calculateInterest(
     interestSum NUMERIC(16, 3)
 )
 BEGIN
-    INSERT INTO interestLog (dateOfCalculation, accountNr, interestSum)
+    INSERT INTO InterestLog (dateOfCalculation, accountNr, interestSum)
         VALUES (NOW(), accountNr, ((SELECT interestRate FROM Bank WHERE id=1) * balance / 365));
 END
 $$
@@ -410,18 +408,18 @@ BEGIN
     DECLARE currentDate CHAR(10);
     DECLARE counter INT;
     DECLARE max INT;
-    SET max = (SELECT MAX(id) FROM interestLog);
+    SET max = (SELECT MAX(id) FROM InterestLog);
     SET counter = 1;
     SET currentDate = CURDATE();
 
-    ALTER TABLE interestLog
+    ALTER TABLE InterestLog
     ADD currentDate INT;
     forEveryAccount: LOOP
     IF counter > max THEN
     LEAVE forEveryAccount;
     END IF;
     SET counter = counter + 1;
-    UPDATE interestLog
+    UPDATE InterestLog
         SET
             currentDate = (SELECT balance FROM Account WHERE id = counter) * (SELECT interest FROM Bank WHERE id = 1)
         WHERE
@@ -502,30 +500,30 @@ VALUES
     ('4556884132140424', 1000),
     ('4929127317239714', 1000);
 
-INSERT INTO interestLog
-	(accountNr)
+INSERT INTO InterestLog
+	(dateAddedToLog, accountNr, interestSum)
 VALUES
-	('5285415127177850'),
-    ('5379026026843638'),
-    ('4556888485452823'),
-    ('4485008559351951'),
-    ('4929160689171173'),
-    ('4485833035399658'),
-    ('4532500237478092'),
-    ('5321570040216486'),
-    ('5521863023006539'),
-    ('4556658461192275'),
-    ('4556526957179207'),
-    ('4916354791700657'),
-    ('4539430653774191'),
-    ('4916417118182022'),
-    ('5296459010695203'),
-    ('4532870059135702'),
-    ('4916678674933740'),
-    ('5217858613379816'),
-    ('5301348860764131'),
-    ('4556884132140424'),
-    ('4929127317239714');
+	(NOW(), '5285415127177850', 0),
+    (NOW(), '5379026026843638', 0),
+    (NOW(), '4556888485452823', 0),
+    (NOW(), '4485008559351951', 0),
+    (NOW(), '4929160689171173', 0),
+    (NOW(), '4485833035399658', 0),
+    (NOW(), '4532500237478092', 0),
+    (NOW(), '5321570040216486', 0),
+    (NOW(), '5521863023006539', 0),
+    (NOW(), '4556658461192275', 0),
+    (NOW(), '4556526957179207', 0),
+    (NOW(), '4916354791700657', 0),
+    (NOW(), '4539430653774191', 0),
+    (NOW(), '4916417118182022', 0),
+    (NOW(), '5296459010695203', 0),
+    (NOW(), '4532870059135702', 0),
+    (NOW(), '4916678674933740', 0),
+    (NOW(), '5217858613379816', 0),
+    (NOW(), '5301348860764131', 0),
+    (NOW(), '4556884132140424', 0),
+    (NOW(), '4929127317239714', 0);
 
 INSERT INTO UserAccount
     (userId, accountId)
@@ -582,5 +580,3 @@ CALL createNewAccountToLoggedInUser(15, 1395);
 SELECT * FROM Account;
 SELECT * FROM UserAccount;
 */
-
--- EXTRAS
