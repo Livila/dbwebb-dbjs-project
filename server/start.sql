@@ -413,15 +413,18 @@ DROP PROCEDURE IF EXISTS calculateInterest$$
 CREATE PROCEDURE calculateInterest(
     dateOfCalculation DATETIME,
     interestRate NUMERIC(3, 2),
-    accountNr INTEGER
+    accountNr NUMERIC(16, 0)
 )
 BEGIN
-    DECLARE balance INTEGER;
-    SET balance = (SELECT balance FROM Account WHERE Account.accountNr = accountNr);
+    DECLARE accBalance INTEGER;
+    SET accBalance = (SELECT balance FROM Account WHERE Account.accountNr = accountNr);
 
-    IF balance != 0 THEN
+    IF accBalance > 0 THEN
         INSERT INTO InterestLog (dateOfCalculation, accountNr, interestSum)
-            VALUES (dateOfCalculation, accountNr, (interestRate * balance) / 365);
+            VALUES (dateOfCalculation, accountNr, (interestRate * accBalance) / 365);
+        SELECT "OK! " + accountNr + " " + ((interestRate * accBalance) / 365);
+    ELSE
+        SELECT "Did not calculate, balance is zero.";
     END IF;
 END
 $$
@@ -436,7 +439,7 @@ BEGIN
     DECLARE count INT;
     DECLARE max INT;
     SET count = 1;
-    SET max = (SELECT MAX(id) FROM InterestLog);
+    SET max = (SELECT MAX(accountId) FROM Account);
 
 forEveryAccount: LOOP
 IF count > max THEN
@@ -450,6 +453,8 @@ SET count = count + 1;
 
 ITERATE forEveryAccount;
 END LOOP;
+
+    SELECT "Done!";
 
 END
 $$ -- End of procedure calculateAllInterests

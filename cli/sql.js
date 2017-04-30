@@ -157,42 +157,63 @@ sql.showSpecUser = (ri) => {
 }
 
 /*
- *
+ * Move money using the web interface
  */
-sql.moveMoney = (userId, usercode, from_accountnr, amount, to_accountnr) => {
-    var sql = `
-    UPDATE VUserAndAccount SET balance = balance - ` +amount + ` WHERE accountId =` + from_accountnr +
-    `;
-    UPDATE VUserAndAccount SET balance = balance + ` + amount + ` WHere accountId =` + to_accountnr + `;`;
-
-    var sql2 = `
-    SELECT balance FROM VUserAndAccount WHERE accountId = ` + from_account+`;`
-/*
-    var getIfUserHaveEnoughMoney = (res) => {
-        res.forEach((row, count) => {
-            var enoughMoney = `${row.balance}`
-
-            if (enoughMoney > )
-        })
-
-    }
-
-    var sql2 = `
-    SELECT balance FROM VUserAndAccount WHERE accountId = ` + to_accountnr+`;`
-    //if the sql returns null the account is inactive
-
+sql.moveMoneyWeb = (ri) => {
     return new Promise((resolve, reject) => {
-        connection.query(sql, (err, res) => {
-            if (err) {
-                reject(err);
-            }
-            if ()
-            prettyPrint(res);
-            resolve();
-        });
+        var userId, pinCode, fromAccountNr, amount, toAccountNr;
+
+        ask(ri, "Enter User Id: ").then((answer) => {
+            userId = answer;
+        }).then(() => {
+        ask(ri, "Enter Pin Code: ").then((answer) => {
+            pinCode = answer;
+        }).then(() => {
+        ask(ri, "Enter the account to transfer from: ").then((answer) => {
+            fromAccountNr = answer;
+        }).then(() => {
+        ask(ri, "Enter the amount you want to transfer: ").then((answer) => {
+            amount = answer;
+        }).then(() => {
+        ask(ri, "Enter the account to transfer to: ").then((answer) => {
+            toAccountNr = answer;
+        }).then(() => {
+            resolve(sqlPromise(`CALL moveMoneyWeb(${userId}, ${pinCode}, ${fromAccountNr}, ${amount}, ${toAccountNr});`)
+                .catch((err) => {
+                    console.log("Something went wrong... " + err);
+                }))
+        })})})})})
     });
-*/
-    return queryPromise(sql, prettyPrint);
+}
+
+/*
+ * Move money using the Swish interface
+ */
+sql.moveMoneySwish = (ri) => {
+    return new Promise((resolve, reject) => {
+        var userId, pinCode, fromAccountNr, amount, toAccountNr;
+
+        ask(ri, "Enter User Id: ").then((answer) => {
+            userId = answer;
+        }).then(() => {
+        ask(ri, "Enter Pin Code: ").then((answer) => {
+            pinCode = answer;
+        }).then(() => {
+        ask(ri, "Enter the account to transfer from: ").then((answer) => {
+            fromAccountNr = answer;
+        }).then(() => {
+        ask(ri, "Enter the amount you want to transfer: ").then((answer) => {
+            amount = answer;
+        }).then(() => {
+        ask(ri, "Enter the account to transfer to: ").then((answer) => {
+            toAccountNr = answer;
+        }).then(() => {
+            resolve(sqlPromise(`CALL moveMoneySwish(${userId}, ${pinCode}, ${fromAccountNr}, ${amount}, ${toAccountNr});`)
+                .catch((err) => {
+                    console.log("Something went wrong... " + err);
+                }))
+        })})})})})
+    });
 }
 
 /*
@@ -284,10 +305,72 @@ sql.connectUserToAccount = (ri) => {
 }
 
 /**
+ * Display the interest for each account
+ */
+sql.calculateAllInterests = () => {
+    return sqlPromise('CALL calculateAllInterests');
+};
+
+/**
+ * Display the interest for one account
+ */
+sql.calculateInterest = (ri) => {
+    return new Promise((resolve, reject) => {
+        var dateOfCalculation, accountNr, interest;
+
+        ask(ri, "Enter Date Of Calculation: ").then((answer) => {
+            dateOfCalculation = answer;
+        }).then(() => {
+        ask(ri, "Enter Account Nr: ").then((answer) => {
+            accountNr = answer;
+        }).then(() => {
+        ask(ri, "Enter The Interest Rate: ").then((answer) => {
+            interest = answer;
+        }).then(() => {
+            resolve(sqlPromise(`CALL calculateInterest(${dateOfCalculation}, ${accountNr}, ${interest})`))
+            .then(() => {
+                console.log("OK!");
+            })
+            .catch((err) => {
+                    console.log("Something went wrong... " + err);
+            })
+    })})})});
+};
+
+/**
  * Display the accumulated interest for each account
  */
-sql.calculateInterest = () => {
-    return sqlPromise('CALL calculateInterest');
+sql.showAllAccumulatedInterests = () => {
+    var sql = `SELECT *, SUM(interestSum) AS sum FROM InterestLog GROUP BY accountNr;`;
+
+    var prettyPrint = (res) => {
+        res.forEach((row, count) => {
+            console.log(`${row.dateOfCalculation}: ${row.accountNr} ${row.sum}kr`);
+        });
+    };
+
+    return queryPromise(sql, prettyPrint);
+};
+
+/**
+ * Display the accumulated interest one account
+ */
+sql.showAccumulatedInterest = () => {
+    return new Promise((resolve, reject) => {
+        var accountNr;
+
+        ask(ri, "Enter Account Nr: ").then((answer) => {
+            accountNr = answer;
+        }).then(() => {
+            var sql = `SELECT dateOfCalculation, accountNr, SUM(interestSum) AS sum FROM InterestLog GROUP BY accountNr WHERE accountNr = ${accountNr};`
+            var prettyPrint = (res) => {
+                res.forEach((row, count) => {
+                    console.log(`${row.dateOfCalculation}: ${accountNr} ${row.sum}kr`);
+                });
+            };
+
+            resolve(queryPromise(sql, prettyPrint));
+    })});
 };
 
 /**

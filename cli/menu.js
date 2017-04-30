@@ -13,12 +13,16 @@ const sql = require('./sql');
 const helpText = `Available commands (not case sensitive):
   exit, help, version
   resetDatabase, fillDatabase
+  moveMoneyWeb, moveMoneySwish     - Move money using services provided
   showUsers                        - Show users with accounts
   showSpecUser                     - Show a specific user
   addUser                          - Add a new user
   addAccount                       - Add a new bank account
   connectUserToAccount             - Connect a user to a bank account
-  calculateInterest                - Calculate the accumulated interest
+  calculateAllInterests            - Calculate all interests
+  calculateInterest                - Calculate one interest
+  showAllAccumulatedInterests      - Show all interests accumulated
+  showAccumulatedInterest          - Show accumulated interest for one account
   showLog                          - Show entries in logs interest and customer
   showBank                         - Show the bank account
 `;
@@ -146,8 +150,38 @@ readlineInterface.on('line', (line) => {
             });
         break;
 
+        case "calculateallinterests":
+            sql.calculateAllInterests()
+            .then(() => {
+                readlineInterface.prompt();
+            })
+            .catch((err) => {
+                throw err;
+            });
+        break;
+
         case "calculateinterest":
-            sql.calculateInterest()
+            sql.calculateInterest(readlineInterface)
+            .then(() => {
+                readlineInterface.prompt();
+            })
+            .catch((err) => {
+                throw err;
+            });
+        break;
+
+        case "showallaccumulatedinterests":
+            sql.showAllAccumulatedInterests()
+            .then(() => {
+                readlineInterface.prompt();
+            })
+            .catch((err) => {
+                throw err;
+            });
+        break;
+
+        case "showaccumulatedinterest":
+            sql.showAccumulatedInterest(readlineInterface)
             .then(() => {
                 readlineInterface.prompt();
             })
@@ -168,6 +202,26 @@ readlineInterface.on('line', (line) => {
 
         case "showbank":
             sql.showBank()
+            .then(() => {
+                readlineInterface.prompt();
+            })
+            .catch((err) => {
+                throw err;
+            });
+        break;
+
+        case "movemoneyweb":
+            sql.moveMoneyWeb()
+            .then(() => {
+                readlineInterface.prompt();
+            })
+            .catch((err) => {
+                throw err;
+            });
+        break;
+
+        case "movemoneyswish":
+            sql.moveMoneySwish()
             .then(() => {
                 readlineInterface.prompt();
             })
