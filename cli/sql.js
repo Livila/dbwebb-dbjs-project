@@ -321,6 +321,23 @@ ${row.userId} sent ${row.amountSent}kr from ${row.accountNrTo} to ${row.accountN
     });
 }
 
+/**
+ * Display bank information
+ */
+sql.showBank = () => {
+    var sql = `
+SELECT * FROM Bank;
+;`;
+
+    var prettyPrint = (res) => {
+        res.forEach((row, count) => {
+            console.log(`The bank has ${row.balance}kr and the interest rate ${row.interestRate}.`);
+        });
+    };
+
+    return queryPromise(sql, prettyPrint);
+};
+
 
 
 /**

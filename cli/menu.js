@@ -156,6 +156,16 @@ readlineInterface.on('line', (line) => {
             });
         break;
 
+        case "showbank":
+            sql.showBank()
+            .then(() => {
+                readlineInterface.prompt();
+            })
+            .catch((err) => {
+                throw err;
+            });
+        break;
+
         case "":
             readlineInterface.prompt();
         break;
