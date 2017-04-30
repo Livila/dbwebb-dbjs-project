@@ -41,7 +41,7 @@ DROP TABLE IF EXISTS Bank;
 CREATE TABLE Bank (
     id INTEGER AUTO_INCREMENT PRIMARY KEY,
     balance INTEGER,
-    interestRate DECIMAL(3,2)
+    interestRate DECIMAL(3, 2)
 );
 
 
@@ -237,8 +237,8 @@ END$$
 
 DROP PROCEDURE IF EXISTS insertMoney$$
 CREATE PROCEDURE insertMoney(
-    accountNr INTEGER,
-    amount INTEGER
+    accountNr NUMERIC(16, 0),
+    amount NUMERIC(8, 3)
 )
 BEGIN
     START TRANSACTION;
@@ -252,6 +252,56 @@ BEGIN
 
         COMMIT;
     END IF;
+END
+$$
+
+
+DROP PROCEDURE IF EXISTS showAllAccumulatedInterests$$
+CREATE PROCEDURE showAllAccumulatedInterests()
+BEGIN
+    SELECT *, SUM(interestSum) AS sum FROM InterestLog GROUP BY accountNr;
+END
+$$
+
+
+DROP PROCEDURE IF EXISTS showAccumulatedInterest$$
+CREATE PROCEDURE showAccumulatedInterest(
+    accountNrToCheck NUMERIC(16, 0),
+)
+BEGIN
+    SELECT dateOfCalculation, accountNr, SUM(interestSum) AS sum FROM InterestLog GROUP BY accountNr WHERE accountNr = ${accountNrToCheck};
+END
+$$
+
+
+DROP PROCEDURE IF EXISTS showInterestLog$$
+CREATE PROCEDURE showInterestLog()
+BEGIN
+    SELECT * FROM InterestLog;
+END
+$$
+
+
+DROP PROCEDURE IF EXISTS showCustomerLog$$
+CREATE PROCEDURE showCustomerLog()
+BEGIN
+    SELECT * FROM CustomerLog;
+END
+$$
+
+
+DROP PROCEDURE IF EXISTS showBank$$
+CREATE PROCEDURE showBank()
+BEGIN
+    SELECT * FROM Bank;
+END
+$$
+
+
+DROP PROCEDURE IF EXISTS showAccountHolders$$
+CREATE PROCEDURE showAccountHolders()
+BEGIN
+    SELECT * FROM VUserAndAccount;
 END
 $$
 
