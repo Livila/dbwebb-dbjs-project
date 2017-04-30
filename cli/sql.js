@@ -195,6 +195,9 @@ sql.moveMoney = (userId, usercode, from_accountnr, amount, to_accountnr) => {
     return queryPromise(sql, prettyPrint);
 }
 
+/*
+ * Add a new user
+*/
 sql.addUser = (ri) => {
     return new Promise((resolve, reject) => {
         var pinCode, civicNumber, firstName, lastName, street, zip, city, phone;
@@ -235,6 +238,9 @@ sql.addUser = (ri) => {
     });
 }
 
+/*
+ * Add a new account and connect it to a user id
+ */
 sql.addAccount = (ri) => {
     return new Promise((resolve, reject) => {
         var accountNr, startBalance, accountHolderId;
@@ -256,6 +262,9 @@ sql.addAccount = (ri) => {
     });
 }
 
+/*
+ * Connect a user to an account
+*/
 sql.connectUserToAccount = (ri) => {
     return new Promise((resolve, reject) => {
         var accountHolderId, accountId;
@@ -271,6 +280,44 @@ sql.connectUserToAccount = (ri) => {
                     console.log("Something went wrong... " + err);
                 });
         })})
+    });
+}
+
+/**
+ * Display show log
+ */
+sql.showLog = (ri) => {
+    return new Promise((resolve, reject) => {
+        var respond;
+
+        ask(ri, "[1]Interest or [2]customer\nEnter option: ").then((answer) => {
+            respond = answer;
+            if (respond == '1' || respond.toLowerCase() == 'interest') {
+                respond = '1';
+            } else if (respond == '2' || respond.toLowerCase() == 'customer') {
+                respond = '2';
+            }
+        }).then(() => {
+            var sql;
+            if (respond == '1') {
+                sql = `SELECT * FROM InterestLog;`;
+            } else if (respond == '2') {
+                sql = `SELECT * FROM CustomerLog;`;
+            }
+
+            var prettyPrint = (res) => {
+                res.forEach((row, count) => {
+                    if (respond == '1') {
+                        console.log(`${row.dateAddedToLog} - ${row.id}: ${row.accountNr} ${row.interestSum}kr interest`);
+                    } else if (respond == '2') {
+                        console.log(`${row.transferDate} - ${row.transferType}
+${row.userId} sent ${row.amountSent}kr from ${row.accountNrTo} to ${row.accountNrFrom}`);
+                    }
+                });
+            };
+
+            resolve(queryPromise(sql, prettyPrint));
+        })
     });
 }
 
