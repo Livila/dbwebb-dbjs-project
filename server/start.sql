@@ -232,7 +232,8 @@ BEGIN
 
     COMMIT;
     END IF;
-END$$
+END
+$$
 
 
 DROP PROCEDURE IF EXISTS insertMoney$$
@@ -243,7 +244,7 @@ CREATE PROCEDURE insertMoney(
 BEGIN
     START TRANSACTION;
 
-    IF (SELECT balance FROM Account WHERE accountNr LIKE accountNr) IS NULL THEN
+    IF (SELECT balance FROM Account WHERE Account.accountNr LIKE accountNr) IS NULL THEN
         ROLLBACK;
         SELECT "Account number does not exist.";
     ELSE
@@ -266,10 +267,13 @@ $$
 
 DROP PROCEDURE IF EXISTS showAccumulatedInterest$$
 CREATE PROCEDURE showAccumulatedInterest(
-    accountNrToCheck NUMERIC(16, 0),
+    accountNrToCheck NUMERIC(16, 0)
 )
 BEGIN
-    SELECT dateOfCalculation, accountNr, SUM(interestSum) AS sum FROM InterestLog GROUP BY accountNr WHERE accountNr = ${accountNrToCheck};
+    SELECT dateOfCalculation, accountNr, SUM(interestSum) AS sum
+    FROM InterestLog
+    WHERE accountNr = accountNrToCheck
+    GROUP BY accountNr;
 END
 $$
 
