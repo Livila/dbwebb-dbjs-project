@@ -11,16 +11,7 @@ var connection;
  * @param options Array of database information for connecting.
  */
 sql.init = (databaseConnOpt) => {
-    console.log(`Using current database settings:
-  Host              ${databaseConnOpt.host}
-  Port              ${databaseConnOpt.port}
-  User              ${databaseConnOpt.user}
-  Password          ${databaseConnOpt.password === '' ? 'NO password' : '********'}
-  Database          ${databaseConnOpt.database}`);
-
-    console.log();
-    console.log('Connecting to the database...');
-
+    // Connecting to the database.
     connection = mysql.createConnection({
         host: databaseConnOpt.host,
         port: databaseConnOpt.port,

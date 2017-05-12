@@ -20,7 +20,7 @@ database.startup = (databaseConnObj) => {
             console.error("Error connecting to database.");
             process.exit(2);
         }
-        console.log("CONNECTION SUCCESSFUL - ID: " + mysqlDatabase.threadId);
+        console.log("CONNECTION SUCCESSFUL - Thread ID: " + mysqlDatabase.threadId);
     });
 };
 database.sqlpromise = (sql) => {

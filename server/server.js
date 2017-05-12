@@ -10,7 +10,7 @@ fs.writeFile(filepathPID, pid, (err) => {
     if (err) {
         throw err;
     }
-    console.log("pid saved at: " + __dirname);
+    console.log("PID saved at: " + __dirname);
 });
 // skapa express-severn
 const bodyparser = require('body-parser');
@@ -29,7 +29,7 @@ if ('LINUX_PORT' in process.env) {
     console.log("LINUX_PORT is set to " + port + ".");
 } else {
     console.log("LINUX_PORT is set to " + port + ".");
-    console.log("Server running at http://127.0.0.1." + port + ": with PID: " + process.pid);
+    console.log("Server running at http://127.0.0.1:" + port + " with PID: " + process.pid);
 }
 
 // ladda routes

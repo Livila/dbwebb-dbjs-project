@@ -30,7 +30,7 @@ const helpText = `Available commands (not case sensitive):
 var connectToDatabase = (databaseConnOpt) => {
     sql.init(databaseConnOpt)
         .then(() => {
-            console.log('Connected!');
+            console.log('Connected to the cli!');
             console.log(helpText);
             readlineInterface.prompt();
         })

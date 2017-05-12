@@ -82,6 +82,14 @@ cli.checkOptionsArguments = () => {
         }
     });
 
+    // Show connection info.
+    console.log(`Using current database settings:
+  Host              ${databaseConnOpt.host}
+  Port              ${databaseConnOpt.port}
+  User              ${databaseConnOpt.user}
+  Password          ${databaseConnOpt.password === '' ? 'NO password' : '********'}
+  Database          ${databaseConnOpt.database}`);
+
     // What's returned to index.js.
     return { databaseConnOpt, VERSION };
 };
