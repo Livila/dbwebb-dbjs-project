@@ -4,16 +4,17 @@ const mysql = require("mysql");
 const database = {};
 var mysqlDatabase;
 
-database.startup = () => {
+database.startup = (databaseConnObj) => {
     let data = {
-        host     : "127.0.0.1",
-        user     : "root",
-        password : "",
-        database : "internetbanken"
+        host     : databaseConnObj.host,
+        port     : databaseConnObj.port,
+        user     : databaseConnObj.user,
+        password : databaseConnObj.password,
+        database : databaseConnObj.database
     };
     mysqlDatabase = mysql.createConnection(data);
-    console.log(data);
-    //koppla mig till databasen
+    //console.log(data);
+    // Anslut till databasen
     mysqlDatabase.connect((err) => {
         if (err) {
             console.error("Error connecting to database.");
